@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import illustrationSearch from '../assets/how-it-works-illustration.jpg'
@@ -70,6 +71,13 @@ export default function HowItWorks() {
               </div>
             ))}
           </div>
+
+          <Link
+            to="/dashboard"
+            className="mt-8 inline-block animate-fade-up rounded-2xl bg-brand px-6 py-3 font-instrument font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 active:scale-95 [animation-delay:600ms]"
+          >
+            Ir al dashboard
+          </Link>
         </div>
 
         <div className="relative w-full max-w-md animate-fade-up self-center [animation-delay:120ms] md:max-w-lg">
