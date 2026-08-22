@@ -59,6 +59,8 @@ export default function HowItWorks() {
                 key={step.title}
                 type="button"
                 onClick={() => setActive(i)}
+                onMouseEnter={() => setActive(i)}
+                onFocus={() => setActive(i)}
                 style={{ animationDelay: `${200 + i * 80}ms` }}
                 className={`animate-fade-up rounded-lg border px-6 py-4 text-left font-instrument transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 ${
                   active === i
