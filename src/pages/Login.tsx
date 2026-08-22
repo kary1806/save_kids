@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import Navbar from '../components/Navbar'
+import AuthLayout from '../components/AuthLayout'
+import FormField from '../components/FormField'
+import PasswordField from '../components/PasswordField'
+import GoogleButton from '../components/GoogleButton'
+import OrDivider from '../components/OrDivider'
 import { supabase } from '../lib/supabase'
-import { INPUT_CLASS } from '../lib/ui'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -28,34 +31,33 @@ export default function Login() {
       return
     }
 
-    navigate('/')
+    navigate('/home')
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-8 py-16">
-        <h1 className="animate-fade-up font-instrument text-3xl font-semibold text-black">Iniciar sesión</h1>
+    <AuthLayout>
+      <div className="rounded-2xl border border-hairline bg-white p-8 shadow-lg">
+        <h1 className="font-instrument text-2xl font-semibold text-black">Inicia sesión</h1>
+        <p className="mt-1 font-instrument text-sm text-black/60">
+          Bienvenido de vuelta a Safe Kids.
+        </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex animate-fade-up flex-col gap-4 [animation-delay:100ms]"
-        >
-          <input
+        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+          <FormField
+            label="Email"
+            name="email"
             type="email"
             required
-            placeholder="Correo electrónico"
+            placeholder="tunombre@ejemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={INPUT_CLASS}
           />
-          <input
-            type="password"
+          <PasswordField
+            label="Contraseña"
+            name="password"
             required
-            placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={INPUT_CLASS}
           />
 
           {error && <p className="font-instrument text-sm text-red-600">{error}</p>}
@@ -67,18 +69,22 @@ export default function Login() {
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
+
+          <OrDivider />
+
+          <GoogleButton />
         </form>
 
-        <p className="animate-fade-up text-center font-instrument text-sm text-black/60 [animation-delay:150ms]">
+        <p className="mt-6 text-center font-instrument text-sm text-black/60">
           ¿No tienes cuenta?{' '}
           <Link
             to="/"
             className="text-brand underline transition-opacity duration-200 hover:opacity-70"
           >
-            Vuelve al inicio
+            Regístrate
           </Link>
         </p>
-      </main>
-    </div>
+      </div>
+    </AuthLayout>
   )
 }

@@ -1,13 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import Navbar from '../components/Navbar'
+import AuthLayout from '../components/AuthLayout'
+import FormField from '../components/FormField'
+import PasswordField from '../components/PasswordField'
+import GoogleButton from '../components/GoogleButton'
+import OrDivider from '../components/OrDivider'
 import { supabase } from '../lib/supabase'
-import { INPUT_CLASS } from '../lib/ui'
-
-const ROLE_LABEL: Record<string, string> = {
-  adolescente: 'Adolescente',
-  acudiente: 'Acudiente',
-}
 
 export default function SignUp() {
   const [searchParams] = useSearchParams()
@@ -54,7 +52,7 @@ export default function SignUp() {
     setLoading(false)
 
     if (data.session) {
-      navigate('/')
+      navigate('/home')
     } else {
       setNeedsConfirmation(true)
     }
@@ -62,57 +60,51 @@ export default function SignUp() {
 
   if (needsConfirmation) {
     return (
-      <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <main className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
-          <h1 className="font-instrument text-3xl font-semibold text-black">Revisa tu correo</h1>
-          <p className="font-instrument text-black/60">
+      <AuthLayout>
+        <div className="animate-fade-up rounded-2xl border border-hairline bg-white p-8 text-center shadow-lg">
+          <h1 className="font-instrument text-2xl font-semibold text-black">Revisa tu correo</h1>
+          <p className="mt-2 font-instrument text-black/60">
             Te enviamos un link de confirmación a {email}.
           </p>
-        </main>
-      </div>
+        </div>
+      </AuthLayout>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-8 py-16">
-        <div className="animate-fade-up">
-          <h1 className="font-instrument text-3xl font-semibold text-black">Crear cuenta</h1>
-          <p className="mt-1 font-instrument text-xl font-normal text-black/60">
-            Registrándote como {ROLE_LABEL[role]}
-          </p>
-        </div>
+    <AuthLayout>
+      <div className="rounded-2xl border border-hairline bg-white p-8 shadow-lg">
+        <h1 className="font-instrument text-2xl font-semibold text-black">Crea tu cuenta</h1>
+        <p className="mt-1 font-instrument text-sm text-black/60">
+          Únete a Safe Kids y empieza a proteger tus recorridos.
+        </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex animate-fade-up flex-col gap-4 [animation-delay:100ms]"
-        >
-          <input
+        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+          <FormField
+            label="Nombre completo"
+            name="fullName"
             type="text"
             required
-            placeholder="Nombre completo"
+            placeholder="Enter your full name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className={INPUT_CLASS}
           />
-          <input
+          <FormField
+            label="Email"
+            name="email"
             type="email"
             required
-            placeholder="Correo electrónico"
+            placeholder="tunombre@ejemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={INPUT_CLASS}
           />
-          <input
-            type="password"
+          <PasswordField
+            label="Contraseña"
+            name="password"
             required
             minLength={6}
-            placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={INPUT_CLASS}
           />
 
           {error && <p className="font-instrument text-sm text-red-600">{error}</p>}
@@ -124,15 +116,22 @@ export default function SignUp() {
           >
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
+
+          <OrDivider />
+
+          <GoogleButton />
         </form>
 
-        <p className="animate-fade-up text-center font-instrument text-sm text-black/60 [animation-delay:150ms]">
+        <p className="mt-6 text-center font-instrument text-sm text-black/60">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="text-brand underline transition-opacity duration-200 hover:opacity-70">
-            Inicia sesión
+          <Link
+            to="/login"
+            className="text-brand underline transition-opacity duration-200 hover:opacity-70"
+          >
+            Login
           </Link>
         </p>
-      </main>
-    </div>
+      </div>
+    </AuthLayout>
   )
 }
