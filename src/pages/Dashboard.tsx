@@ -17,8 +17,11 @@ import {
   Menu,
   X,
   Users,
+  LogOut,
 } from 'lucide-react'
 import { useSession } from '../lib/useSession'
+import { supabase } from '../lib/supabase'
+import ZoneReportsPanel from '../components/ZoneReportsPanel'
 
 const CATEGORIES = [
   { key: 'todo', label: 'Todo' },
@@ -76,7 +79,7 @@ const NAV_ITEMS = [
   { label: 'Tú zona', icon: MapPin, color: '#000000', active: false },
 ]
 
-function Sidebar({ onClose }: { onClose?: () => void }) {
+function Sidebar({ onClose, onSignOut }: { onClose?: () => void; onSignOut: () => void }) {
   return (
     <div className="flex h-full w-64 flex-col px-4 py-6">
       <div className="flex items-center justify-between px-2">
@@ -126,6 +129,14 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           <HelpCircle className="h-5 w-5 flex-shrink-0" />
           Ayuda
         </button>
+        <button
+          type="button"
+          onClick={onSignOut}
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-red-50 hover:text-red-600"
+        >
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          Cerrar sesión
+        </button>
       </div>
 
       <div className="mt-auto overflow-hidden rounded-xl border border-hairline">
@@ -168,16 +179,21 @@ export default function Dashboard() {
   const displayName = fullName ?? 'Usuaria'
   const initial = displayName.charAt(0).toUpperCase()
 
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    navigate('/')
+  }
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white">
       <aside className="hidden flex-shrink-0 border-r border-hairline md:flex">
-        <Sidebar />
+        <Sidebar onSignOut={handleSignOut} />
       </aside>
 
       {menuOpen && (
         <div className="fixed inset-0 z-[2000] flex md:hidden">
           <div className="border-r border-hairline bg-white shadow-xl">
-            <Sidebar onClose={() => setMenuOpen(false)} />
+            <Sidebar onClose={() => setMenuOpen(false)} onSignOut={handleSignOut} />
           </div>
           <button
             type="button"
@@ -229,9 +245,9 @@ export default function Dashboard() {
               key={cat.key}
               type="button"
               onClick={() => setCategory(cat.key)}
-              className={`flex-shrink-0 rounded-full border px-4 py-1.5 font-instrument text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 ${
+              className={`flex-shrink-0 rounded-full border px-4 py-1.5 font-instrument text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 ${
                 category === cat.key
-                  ? 'border-brand bg-brand text-white shadow-sm'
+                  ? 'border-brand bg-brand text-white shadow-md'
                   : 'border-hairline text-black hover:border-brand hover:text-brand'
               }`}
             >
@@ -241,6 +257,7 @@ export default function Dashboard() {
         </div>
 
         <div className="relative flex-1">
+          <ZoneReportsPanel />
           <MapContainer
             center={[10.406, -75.5144]}
             zoom={13}
