@@ -1,35 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import { supabase } from '../lib/supabase'
+import { useSession } from '../lib/useSession'
 
 export default function Home() {
-  const [loading, setLoading] = useState(true)
-  const [firstName, setFirstName] = useState('de nuevo')
+  const { session, loading } = useSession()
   const navigate = useNavigate()
 
   useEffect(() => {
-    let active = true
+    if (!loading && !session) navigate('/login')
+  }, [loading, session, navigate])
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) return
+  if (loading || !session) return null
 
-      if (!data.session) {
-        navigate('/login')
-        return
-      }
-
-      const fullName = data.session.user.user_metadata.full_name as string | undefined
-      setFirstName(fullName?.split(' ')[0] ?? 'de nuevo')
-      setLoading(false)
-    })
-
-    return () => {
-      active = false
-    }
-  }, [navigate])
-
-  if (loading) return null
+  const fullName = session.user.user_metadata.full_name as string | undefined
+  const firstName = fullName?.split(' ')[0] ?? 'de nuevo'
 
   return (
     <div className="flex min-h-screen flex-col">

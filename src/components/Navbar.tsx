@@ -1,10 +1,14 @@
 import { Link } from 'react-router-dom'
+import { useSession } from '../lib/useSession'
 
 export default function Navbar() {
+  const { session } = useSession()
+  const isAuthenticated = !!session
+
   return (
     <header className="flex h-[95px] w-full items-center justify-between border-b border-hairline px-8 md:px-16">
       <Link
-        to="/"
+        to={isAuthenticated ? '/home' : '/'}
         className="font-instrument text-2xl font-semibold text-brand-logo transition-transform duration-200 hover:scale-105 md:text-[32px]"
       >
         Logo
@@ -39,18 +43,22 @@ export default function Navbar() {
         >
           🌙
         </button>
-        <Link
-          to="/login"
-          className="rounded-2xl border border-hairline px-6 py-2 font-instrument text-sm text-black transition-all duration-200 hover:scale-105 hover:border-brand hover:text-brand active:scale-95"
-        >
-          login
-        </Link>
-        <Link
-          to="/signup"
-          className="rounded-2xl bg-brand px-6 py-2 font-instrument text-sm text-white transition-transform duration-200 hover:scale-105 active:scale-95"
-        >
-          Signup
-        </Link>
+        {!isAuthenticated && (
+          <>
+            <Link
+              to="/login"
+              className="rounded-2xl border border-hairline px-6 py-2 font-instrument text-sm text-black transition-all duration-200 hover:scale-105 hover:border-brand hover:text-brand active:scale-95"
+            >
+              login
+            </Link>
+            <Link
+              to="/signup"
+              className="rounded-2xl bg-brand px-6 py-2 font-instrument text-sm text-white transition-transform duration-200 hover:scale-105 active:scale-95"
+            >
+              Signup
+            </Link>
+          </>
+        )}
       </div>
     </header>
   )
