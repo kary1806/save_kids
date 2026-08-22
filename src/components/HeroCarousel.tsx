@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import slideBoyBus from '../assets/carousel-boybus.jpg'
 import slideMap from '../assets/hero-illustration.jpg'
 import slideSearch from '../assets/carousel-search.jpg'
 import slideTablet from '../assets/carousel-tablet.jpg'
@@ -6,6 +7,7 @@ import slideSchedule from '../assets/carousel-schedule.jpg'
 import slideReport from '../assets/carousel-report.jpg'
 
 const SLIDES = [
+  { src: slideBoyBus, alt: 'Adolescente ubicando su bus escolar y compañeras en el mapa' },
   { src: slideMap, alt: 'Adolescentes revisando su ruta en el mapa' },
   { src: slideSearch, alt: 'Adolescente buscando una zona segura' },
   { src: slideTablet, alt: 'Adolescente consultando el contexto de su ruta' },
