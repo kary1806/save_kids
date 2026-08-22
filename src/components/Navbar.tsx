@@ -54,23 +54,23 @@ export default function Navbar() {
           <button
             type="button"
             onClick={handleSignOut}
-            className="rounded-2xl bg-brand px-6 py-2 font-instrument text-sm text-white transition-transform duration-200 hover:scale-105 active:scale-95"
+            className="rounded-2xl bg-brand px-6 py-2.5 font-instrument text-sm font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 active:scale-95"
           >
-            Cerrar sesión
+            Log out
           </button>
         ) : (
           <>
             <Link
               to="/login"
-              className="rounded-2xl border border-hairline px-6 py-2 font-instrument text-sm text-black transition-all duration-200 hover:scale-105 hover:border-brand hover:text-brand active:scale-95"
+              className="rounded-2xl border border-hairline px-6 py-2.5 font-instrument text-sm font-semibold text-black shadow-sm transition-all duration-200 hover:scale-105 hover:border-brand hover:text-brand active:scale-95"
             >
-              login
+              Log in
             </Link>
             <Link
               to="/signup"
-              className="rounded-2xl bg-brand px-6 py-2 font-instrument text-sm text-white transition-transform duration-200 hover:scale-105 active:scale-95"
+              className="rounded-2xl bg-brand px-6 py-2.5 font-instrument text-sm font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 active:scale-95"
             >
-              Signup
+              Sign up
             </Link>
           </>
         )}
