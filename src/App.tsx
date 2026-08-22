@@ -9,6 +9,7 @@ import ContactUs from './pages/ContactUs'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfUse from './pages/TermsOfUse'
 import Sitemap from './pages/Sitemap'
+import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfUse />} />
         <Route path="/sitemap" element={<Sitemap />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   )

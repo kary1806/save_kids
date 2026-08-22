@@ -34,6 +34,12 @@ export default function Home() {
           de orientación y desplazamientos seguros. Explora el carrusel de herramientas para
           planificar tu ruta al colegio o de regreso a casa.
         </p>
+        <Link
+          to="/dashboard"
+          className="animate-fade-up rounded-2xl bg-brand px-6 py-3 font-instrument font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 active:scale-95 [animation-delay:200ms]"
+        >
+          Ir a mi mapa
+        </Link>
       </main>
     </div>
   )

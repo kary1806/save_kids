@@ -55,14 +55,11 @@ export default function HowItWorks() {
 
           <div className="mt-8 flex flex-col gap-4">
             {STEPS.map((step, i) => (
-              <button
+              <div
                 key={step.title}
-                type="button"
-                onClick={() => setActive(i)}
                 onMouseEnter={() => setActive(i)}
-                onFocus={() => setActive(i)}
                 style={{ animationDelay: `${200 + i * 80}ms` }}
-                className={`animate-fade-up rounded-lg border px-6 py-4 text-left font-instrument transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 ${
+                className={`animate-fade-up rounded-lg border px-6 py-4 font-instrument transition-all duration-200 ${
                   active === i
                     ? 'border-brand bg-brand/5 shadow-md'
                     : 'border-black/20 bg-white'
@@ -70,7 +67,7 @@ export default function HowItWorks() {
               >
                 <span className="block text-lg font-medium text-black">{step.title}</span>
                 <span className="mt-1 block text-black/60">{step.description}</span>
-              </button>
+              </div>
             ))}
           </div>
         </div>
