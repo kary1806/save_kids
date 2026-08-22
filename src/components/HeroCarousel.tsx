@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import slideBoyBus from '../assets/carousel-boybus.jpg'
 import slideMap from '../assets/hero-illustration.jpg'
 import slideSearch from '../assets/carousel-search.jpg'
@@ -17,6 +17,13 @@ const SLIDES = [
 
 export default function HeroCarousel() {
   const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % SLIDES.length)
+    }, 1500)
+    return () => clearInterval(id)
+  }, [])
 
   function go(delta: number) {
     setIndex((i) => (i + delta + SLIDES.length) % SLIDES.length)
