@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { supabase } from '../lib/supabase'
 
@@ -35,9 +35,12 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-8 py-16 text-center">
-        <span className="animate-fade-up rounded-full bg-brand/10 px-4 py-1.5 font-instrument text-sm text-brand">
+        <Link
+          to="/how-it-works"
+          className="animate-fade-up rounded-full bg-brand/10 px-4 py-1.5 font-instrument text-sm text-brand transition-transform duration-200 hover:scale-105 active:scale-95"
+        >
           🧑‍🤝‍🧑 Sesión iniciada
-        </span>
+        </Link>
         <h1 className="animate-fade-up font-instrument text-3xl font-semibold text-black [animation-delay:100ms]">
           Hola, {firstName}! 👋
         </h1>
