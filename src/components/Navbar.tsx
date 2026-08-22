@@ -1,0 +1,54 @@
+import { Link } from 'react-router-dom'
+
+export default function Navbar() {
+  return (
+    <header className="flex h-[95px] w-full items-center justify-between border-b border-hairline px-8 md:px-16">
+      <span className="font-inter text-2xl font-bold text-brand-logo transition-transform duration-200 hover:scale-105 md:text-[32px]">
+        Logo
+      </span>
+
+      <nav className="hidden items-center gap-8 md:flex">
+        <a
+          href="#"
+          className="font-instrument text-base text-black transition-colors duration-200 hover:text-brand"
+        >
+          Blog
+        </a>
+        <a
+          href="#"
+          className="font-instrument text-base text-black transition-colors duration-200 hover:text-brand"
+        >
+          Contac Us
+        </a>
+        <a
+          href="#"
+          className="font-instrument text-base text-black transition-colors duration-200 hover:text-brand"
+        >
+          About Us
+        </a>
+      </nav>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          aria-label="Toggle theme"
+          className="hidden h-8 w-8 items-center justify-center text-black transition-transform duration-200 hover:rotate-12 hover:scale-110 md:flex"
+        >
+          🌙
+        </button>
+        <Link
+          to="/login"
+          className="rounded-2xl border border-hairline px-6 py-2 font-instrument text-sm text-black transition-all duration-200 hover:scale-105 hover:border-brand hover:text-brand active:scale-95"
+        >
+          login
+        </Link>
+        <Link
+          to="/signup"
+          className="rounded-2xl bg-brand px-6 py-2 font-instrument text-sm text-white transition-transform duration-200 hover:scale-105 active:scale-95"
+        >
+          Signup
+        </Link>
+      </div>
+    </header>
+  )
+}
