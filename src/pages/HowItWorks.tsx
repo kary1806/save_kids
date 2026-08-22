@@ -1,24 +1,35 @@
 import { useState } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import illustration from '../assets/how-it-works-illustration.jpg'
+import illustrationSearch from '../assets/how-it-works-illustration.jpg'
+import illustrationTablet from '../assets/carousel-tablet.jpg'
+import illustrationSchedule from '../assets/carousel-schedule.jpg'
+import illustrationReport from '../assets/carousel-report.jpg'
 
 const STEPS = [
   {
     title: 'Busca una zona',
     description: 'Escribe una dirección o selecciona un punto',
+    image: illustrationSearch,
+    alt: 'Adolescente buscando una zona segura en el mapa',
   },
   {
     title: 'Consulta el contexto',
     description: 'Revisa reportes, tipo de situaciones y cuándo fue actualizada la información',
+    image: illustrationTablet,
+    alt: 'Adolescente consultando el contexto de la ruta en su tablet',
   },
   {
     title: 'Elige un horario',
     description: 'Selecciona mañana, tarde o noche para conocer las condiciones reportadas',
+    image: illustrationSchedule,
+    alt: 'Adolescente eligiendo un horario para desplazarse',
   },
   {
     title: 'Reporta una situación',
     description: 'Indica qué ocurrió, dónde y cuando. El reporte será revisado.',
+    image: illustrationReport,
+    alt: 'Adolescente reportando una situación',
   },
 ]
 
@@ -62,11 +73,18 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        <img
-          src={illustration}
-          alt="Adolescente consultando el mapa de Safe Kids en Cartagena"
-          className="w-full max-w-md animate-fade-up self-center rounded-2xl [animation-delay:120ms] md:max-w-lg"
-        />
+        <div className="relative w-full max-w-md animate-fade-up self-center [animation-delay:120ms] md:max-w-lg">
+          {STEPS.map((step, i) => (
+            <img
+              key={step.image}
+              src={step.image}
+              alt={step.alt}
+              className={`w-full rounded-2xl transition-opacity duration-500 ${
+                i === active ? 'relative opacity-100' : 'absolute inset-0 opacity-0'
+              }`}
+            />
+          ))}
+        </div>
       </main>
 
       <Footer />
