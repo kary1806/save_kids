@@ -21,8 +21,10 @@ export default function Landing() {
         <img
           src={heroIllustration}
           alt="Adolescentes usando Safe Kids para ubicarse en su ciudad"
-          className="h-auto w-full max-w-[602px] animate-fade-up rounded-lg border-l transition-transform duration-500 hover:-rotate-1 hover:scale-[1.02] md:border-hairline object-cover md:border-r md:pr-12"
+          className="h-auto w-full max-w-[602px] animate-fade-up rounded-lg object-cover transition-transform duration-500 hover:-rotate-1 hover:scale-[1.02]"
         />
+
+        <div className="hidden self-stretch border-l border-divider md:block" />
 
         <div className="flex flex-col items-center gap-8 text-center md:items-start md:text-left">
           <div className="animate-fade-up [animation-delay:150ms]">
