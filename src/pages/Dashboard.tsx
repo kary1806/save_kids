@@ -22,6 +22,8 @@ import {
 import { useSession } from '../lib/useSession'
 import { supabase } from '../lib/supabase'
 import ZoneReportsPanel from '../components/ZoneReportsPanel'
+import TimeSelectorModal, { type TimeOfDay } from '../components/TimeSelectorModal'
+import ConditionsModal from '../components/ConditionsModal'
 
 const CATEGORIES = [
   { key: 'todo', label: 'Todo' },
@@ -162,6 +164,13 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]['key']>('todo')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [timeModalOpen, setTimeModalOpen] = useState(false)
+  const [selectedTime, setSelectedTime] = useState<TimeOfDay | null>(null)
+
+  const selectedPlace = {
+    name: 'Centro Comercial Caribe Plaza',
+    address: 'Cl. 29d #22-108, Pie de la Popa, Cartagena de Indias, Bolívar',
+  }
 
   useEffect(() => {
     if (!loading && !session) navigate('/login')
@@ -257,7 +266,7 @@ export default function Dashboard() {
         </div>
 
         <div className="relative flex-1">
-          <ZoneReportsPanel />
+          <ZoneReportsPanel onConsultarHorario={() => setTimeModalOpen(true)} />
           <MapContainer
             center={[10.406, -75.5144]}
             zoom={13}
@@ -299,6 +308,26 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {timeModalOpen && (
+        <TimeSelectorModal
+          placeName={selectedPlace.name}
+          onClose={() => setTimeModalOpen(false)}
+          onSelect={(time) => {
+            setSelectedTime(time)
+            setTimeModalOpen(false)
+          }}
+        />
+      )}
+
+      {selectedTime && (
+        <ConditionsModal
+          placeName={selectedPlace.name}
+          address={selectedPlace.address}
+          time={selectedTime}
+          onClose={() => setSelectedTime(null)}
+        />
+      )}
     </div>
   )
 }
