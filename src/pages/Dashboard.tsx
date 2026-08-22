@@ -223,7 +223,7 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <div className="flex gap-2 overflow-x-auto border-b border-hairline px-4 py-3 sm:px-6">
+        <div className="flex gap-2 overflow-x-auto px-4 py-3 sm:px-6">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.key}
