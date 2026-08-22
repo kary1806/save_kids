@@ -3,8 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import {
+  ShieldCheck,
+  Home,
+  Map as MapIcon,
+  TriangleAlert,
+  Route,
+  MapPin,
+  Settings,
+  HelpCircle,
+  Search,
+  Bell,
+  Menu,
+  X,
+  Users,
+} from 'lucide-react'
 import { useSession } from '../lib/useSession'
-import iconTeens from '../assets/icon-teens.svg'
 
 const CATEGORIES = [
   { key: 'todo', label: 'Todo' },
@@ -55,17 +69,88 @@ function riskIcon(risk: RiskLevel) {
 }
 
 const NAV_ITEMS = [
-  { label: 'Inicio', icon: '🏠', active: true },
-  { label: 'Mapa', icon: '🗺️', active: false },
-  { label: 'Reportar Situación', icon: '⚠️', active: false },
-  { label: 'Rutas', icon: '🧭', active: false },
-  { label: 'Tú zona', icon: '📍', active: false },
+  { label: 'Inicio', icon: Home, color: '#000000', active: true },
+  { label: 'Mapa', icon: MapIcon, color: '#2563eb', active: false },
+  { label: 'Reportar Situación', icon: TriangleAlert, color: '#f97316', active: false },
+  { label: 'Rutas', icon: Route, color: '#16a34a', active: false },
+  { label: 'Tú zona', icon: MapPin, color: '#000000', active: false },
 ]
+
+function Sidebar({ onClose }: { onClose?: () => void }) {
+  return (
+    <div className="flex h-full w-64 flex-col px-4 py-6">
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-6 w-6 text-brand" />
+          <span className="font-instrument text-lg font-bold text-black">
+            SAFE <span className="text-brand">KIDS</span>
+          </span>
+        </div>
+        {onClose && (
+          <button type="button" onClick={onClose} aria-label="Cerrar menú" className="md:hidden">
+            <X className="h-5 w-5 text-black/60" />
+          </button>
+        )}
+      </div>
+
+      <nav className="mt-8 flex flex-col gap-1">
+        {NAV_ITEMS.map((item) => (
+          <button
+            key={item.label}
+            type="button"
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm transition-colors duration-200 ${
+              item.active ? 'bg-brand text-white' : 'text-black hover:bg-brand/5'
+            }`}
+          >
+            <item.icon
+              className="h-5 w-5 flex-shrink-0"
+              style={{ color: item.active ? '#ffffff' : item.color }}
+            />
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="mt-6 flex flex-col gap-1 border-t border-hairline pt-6">
+        <button
+          type="button"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5"
+        >
+          <Settings className="h-5 w-5 flex-shrink-0" />
+          Configuración
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5"
+        >
+          <HelpCircle className="h-5 w-5 flex-shrink-0" />
+          Ayuda
+        </button>
+      </div>
+
+      <div className="mt-auto overflow-hidden rounded-xl border border-hairline">
+        <div className="flex items-center justify-center gap-3 bg-brand/10 py-6">
+          <Users className="h-7 w-7 text-brand" />
+          <ShieldCheck className="h-9 w-9 text-brand" />
+        </div>
+        <div className="bg-white p-4">
+          <p className="font-instrument text-sm font-semibold text-brand">
+            Tu información hace la diferencia
+          </p>
+          <p className="mt-1 font-instrument text-xs text-black/60">
+            Reporta y consulta para tener una ciudad más segura.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function Dashboard() {
   const { session, loading } = useSession()
   const navigate = useNavigate()
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]['key']>('todo')
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     if (!loading && !session) navigate('/login')
@@ -85,69 +170,49 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white">
-      <aside className="flex w-64 flex-shrink-0 flex-col border-r border-hairline px-4 py-6">
-        <div className="flex items-center gap-2 px-2">
-          <span className="text-xl">🛡️</span>
-          <span className="font-instrument text-lg font-bold text-black">SAFE KIDS</span>
-        </div>
-
-        <nav className="mt-8 flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-left font-instrument text-sm transition-colors duration-200 ${
-                item.active
-                  ? 'bg-brand text-white'
-                  : 'text-black hover:bg-brand/5'
-              }`}
-            >
-              <span>{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="mt-6 flex flex-col gap-1 border-t border-hairline pt-6">
-          <button
-            type="button"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5"
-          >
-            ⚙️ Configuración
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5"
-          >
-            ❓ Ayuda
-          </button>
-        </div>
-
-        <div className="mt-auto rounded-xl bg-brand/5 p-4">
-          <img src={iconTeens} alt="" className="h-10 w-10" />
-          <p className="mt-2 font-instrument text-sm font-semibold text-brand">
-            Tu información hace la diferencia
-          </p>
-          <p className="mt-1 font-instrument text-xs text-black/60">
-            Reporta y consulta para tener una ciudad más segura.
-          </p>
-        </div>
+      <aside className="hidden flex-shrink-0 border-r border-hairline md:flex">
+        <Sidebar />
       </aside>
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center gap-4 border-b border-hairline px-6 py-4">
-          <div className="flex flex-1 items-center gap-2 rounded-full border border-hairline px-4 py-2">
-            <span className="text-black/40">🔍</span>
+      {menuOpen && (
+        <div className="fixed inset-0 z-[2000] flex md:hidden">
+          <div className="border-r border-hairline bg-white shadow-xl">
+            <Sidebar onClose={() => setMenuOpen(false)} />
+          </div>
+          <button
+            type="button"
+            aria-label="Cerrar menú"
+            className="flex-1 bg-black/30"
+            onClick={() => setMenuOpen(false)}
+          />
+        </div>
+      )}
+
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex flex-wrap items-center gap-3 border-b border-hairline px-4 py-4 sm:px-6">
+          <button
+            type="button"
+            aria-label="Abrir menú"
+            onClick={() => setMenuOpen(true)}
+            className="md:hidden"
+          >
+            <Menu className="h-6 w-6 text-black" />
+          </button>
+
+          <div className="flex min-w-[140px] flex-1 items-center gap-2 rounded-full border border-hairline px-4 py-2">
+            <Search className="h-4 w-4 flex-shrink-0 text-black/40" />
             <input
               type="text"
               placeholder="¿A dónde vas?"
-              className="w-full font-instrument text-sm text-black outline-none placeholder:text-black/40"
+              className="w-full min-w-0 font-instrument text-sm text-black outline-none placeholder:text-black/40"
             />
           </div>
-          <button type="button" aria-label="Notificaciones" className="text-xl">
-            🔔
+
+          <button type="button" aria-label="Notificaciones" className="flex-shrink-0">
+            <Bell className="h-5 w-5 text-black/70" />
           </button>
-          <div className="flex items-center gap-2">
+
+          <div className="flex flex-shrink-0 items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand font-instrument text-sm font-semibold text-white">
               {initial}
             </span>
@@ -158,15 +223,15 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <div className="flex flex-wrap gap-2 border-b border-hairline px-6 py-3">
+        <div className="flex gap-2 overflow-x-auto border-b border-hairline px-4 py-3 sm:px-6">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.key}
               type="button"
               onClick={() => setCategory(cat.key)}
-              className={`rounded-full border px-4 py-1.5 font-instrument text-sm transition-all duration-200 hover:scale-105 active:scale-95 ${
+              className={`flex-shrink-0 rounded-full border px-4 py-1.5 font-instrument text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 ${
                 category === cat.key
-                  ? 'border-brand bg-brand text-white'
+                  ? 'border-brand bg-brand text-white shadow-sm'
                   : 'border-hairline text-black hover:border-brand hover:text-brand'
               }`}
             >
