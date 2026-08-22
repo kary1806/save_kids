@@ -31,7 +31,7 @@ export default function Landing() {
             <h1 className="font-instrument text-5xl font-semibold tracking-wide text-black">
               HOLA!
             </h1>
-            <p className="mt-2 font-cormorant text-3xl text-black">
+            <p className="mt-2 font-instrument text-3xl font-normal text-black">
               ¿Cómo utilizarás Safe Kids?
             </p>
           </div>

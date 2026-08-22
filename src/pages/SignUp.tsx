@@ -65,7 +65,7 @@ export default function SignUp() {
       <div className="flex min-h-screen flex-col">
         <Navbar />
         <main className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
-          <h1 className="font-instrument text-3xl text-black">Revisa tu correo</h1>
+          <h1 className="font-instrument text-3xl font-semibold text-black">Revisa tu correo</h1>
           <p className="font-instrument text-black/60">
             Te enviamos un link de confirmación a {email}.
           </p>
@@ -79,8 +79,8 @@ export default function SignUp() {
       <Navbar />
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-8 py-16">
         <div className="animate-fade-up">
-          <h1 className="font-instrument text-3xl text-black">Crear cuenta</h1>
-          <p className="mt-1 font-cormorant text-xl text-black/60">
+          <h1 className="font-instrument text-3xl font-semibold text-black">Crear cuenta</h1>
+          <p className="mt-1 font-instrument text-xl font-normal text-black/60">
             Registrándote como {ROLE_LABEL[role]}
           </p>
         </div>

@@ -1,10 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Instrument+Sans:wght@400;500;600&family=Cormorant+Infant:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-inter: 'Inter', sans-serif;
   --font-instrument: 'Instrument Sans', sans-serif;
-  --font-cormorant: 'Cormorant Infant', serif;
 
   --color-brand: #235ee0;
   --color-brand-logo: #0047bb;

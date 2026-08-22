@@ -35,7 +35,7 @@ export default function Login() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-8 py-16">
-        <h1 className="animate-fade-up font-instrument text-3xl text-black">Iniciar sesión</h1>
+        <h1 className="animate-fade-up font-instrument text-3xl font-semibold text-black">Iniciar sesión</h1>
 
         <form
           onSubmit={handleSubmit}

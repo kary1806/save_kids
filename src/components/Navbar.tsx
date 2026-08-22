@@ -5,7 +5,7 @@ export default function Navbar() {
     <header className="flex h-[95px] w-full items-center justify-between border-b border-hairline px-8 md:px-16">
       <Link
         to="/"
-        className="font-inter text-2xl font-bold text-brand-logo transition-transform duration-200 hover:scale-105 md:text-[32px]"
+        className="font-instrument text-2xl font-semibold text-brand-logo transition-transform duration-200 hover:scale-105 md:text-[32px]"
       >
         Logo
       </Link>
