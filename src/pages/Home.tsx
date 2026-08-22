@@ -20,12 +20,9 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-8 py-16 text-center">
-        <Link
-          to="/how-it-works"
-          className="animate-fade-up rounded-full bg-brand/10 px-4 py-1.5 font-instrument text-sm text-brand transition-transform duration-200 hover:scale-105 active:scale-95"
-        >
+        <span className="animate-fade-up rounded-full bg-brand/10 px-4 py-1.5 font-instrument text-sm text-brand">
           🧑‍🤝‍🧑 Sesión iniciada
-        </Link>
+        </span>
         <h1 className="animate-fade-up font-instrument text-3xl font-semibold text-black [animation-delay:100ms]">
           Hola, {firstName}! 👋
         </h1>
@@ -34,12 +31,20 @@ export default function Home() {
           de orientación y desplazamientos seguros. Explora el carrusel de herramientas para
           planificar tu ruta al colegio o de regreso a casa.
         </p>
-        <Link
-          to="/dashboard"
-          className="animate-fade-up rounded-2xl bg-brand px-6 py-3 font-instrument font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 active:scale-95 [animation-delay:200ms]"
-        >
-          Ir a mi mapa
-        </Link>
+        <div className="mt-2 flex animate-fade-up flex-wrap justify-center gap-4 [animation-delay:200ms]">
+          <Link
+            to="/how-it-works"
+            className="rounded-2xl border border-hairline px-6 py-3 font-instrument font-semibold text-black shadow-sm transition-all duration-200 hover:scale-105 hover:border-brand hover:text-brand active:scale-95"
+          >
+            Cómo funciona
+          </Link>
+          <Link
+            to="/dashboard"
+            className="rounded-2xl bg-brand px-6 py-3 font-instrument font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 active:scale-95"
+          >
+            Dashboard
+          </Link>
+        </div>
       </main>
     </div>
   )
