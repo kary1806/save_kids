@@ -46,7 +46,7 @@ export default function Navbar() {
         <button
           type="button"
           aria-label="Toggle theme"
-          className="hidden h-8 w-8 items-center justify-center text-black transition-transform duration-200 hover:rotate-12 hover:scale-110 md:flex"
+          className="hidden h-9 w-9 items-center justify-center rounded-full border border-hairline text-black transition-transform duration-200 hover:rotate-12 hover:scale-110 md:flex"
         >
           🌙
         </button>
