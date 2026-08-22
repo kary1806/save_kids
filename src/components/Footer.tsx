@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Footer() {
   return (
     <footer className="mt-auto flex h-[151px] w-full items-center border-t border-hairline">
@@ -11,11 +13,21 @@ export default function Footer() {
             <a href="#" aria-label="GitHub">⌥</a>
           </div>
           <nav className="flex flex-wrap justify-center gap-6 font-instrument text-sm text-black">
-            <a href="#">About us</a>
-            <a href="#">Contact</a>
-            <a href="#">Privacy policy</a>
-            <a href="#">Sitemap</a>
-            <a href="#">Terms of Use</a>
+            <Link to="/about" className="transition-colors duration-200 hover:text-brand">
+              About us
+            </Link>
+            <Link to="/contact" className="transition-colors duration-200 hover:text-brand">
+              Contact
+            </Link>
+            <Link to="/privacy" className="transition-colors duration-200 hover:text-brand">
+              Privacy policy
+            </Link>
+            <Link to="/sitemap" className="transition-colors duration-200 hover:text-brand">
+              Sitemap
+            </Link>
+            <Link to="/terms" className="transition-colors duration-200 hover:text-brand">
+              Terms of Use
+            </Link>
           </nav>
         </div>
       </div>

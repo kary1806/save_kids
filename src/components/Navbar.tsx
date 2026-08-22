@@ -28,18 +28,18 @@ export default function Navbar() {
         >
           Blog
         </a>
-        <a
-          href="#"
+        <Link
+          to="/contact"
           className="font-instrument text-base text-black transition-colors duration-200 hover:text-brand"
         >
           Contac Us
-        </a>
-        <a
-          href="#"
+        </Link>
+        <Link
+          to="/about"
           className="font-instrument text-base text-black transition-colors duration-200 hover:text-brand"
         >
           About Us
-        </a>
+        </Link>
       </nav>
 
       <div className="flex items-center gap-3">
