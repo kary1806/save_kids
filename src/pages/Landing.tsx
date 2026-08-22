@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import HeroCarousel from '../components/HeroCarousel'
+import { useSession } from '../lib/useSession'
 import iconTeens from '../assets/icon-teens.svg'
 import iconParent from '../assets/icon-parent.svg'
 import iconRocket from '../assets/icon-rocket.svg'
@@ -13,6 +15,15 @@ const options = [
 ]
 
 export default function Landing() {
+  const { session, loading } = useSession()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!loading && session) navigate('/home')
+  }, [loading, session, navigate])
+
+  if (loading || session) return null
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />

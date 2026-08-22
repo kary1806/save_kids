@@ -1,9 +1,16 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSession } from '../lib/useSession'
+import { supabase } from '../lib/supabase'
 
 export default function Navbar() {
   const { session } = useSession()
   const isAuthenticated = !!session
+  const navigate = useNavigate()
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    navigate('/')
+  }
 
   return (
     <header className="flex h-[95px] w-full items-center justify-between border-b border-hairline px-8 md:px-16">
@@ -43,7 +50,15 @@ export default function Navbar() {
         >
           🌙
         </button>
-        {!isAuthenticated && (
+        {isAuthenticated ? (
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="rounded-2xl bg-brand px-6 py-2 font-instrument text-sm text-white transition-transform duration-200 hover:scale-105 active:scale-95"
+          >
+            Cerrar sesión
+          </button>
+        ) : (
           <>
             <Link
               to="/login"
