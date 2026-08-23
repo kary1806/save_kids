@@ -187,6 +187,16 @@ export default function ZoneReportsPanel({
               )}
 
               {situationCounts.length > 0 && (
+                <button
+                  type="button"
+                  onClick={onConsultarHorario}
+                  className="rounded-2xl border border-hairline px-4 py-2.5 font-instrument text-sm font-semibold text-black transition-all duration-200 hover:scale-[1.02] hover:border-brand hover:text-brand active:scale-95"
+                >
+                  Consultar por horario
+                </button>
+              )}
+
+              {situationCounts.length > 0 && (
                 <div>
                   <p className="font-instrument text-sm font-semibold text-black">
                     Reportes registrados
@@ -261,16 +271,6 @@ export default function ZoneReportsPanel({
                 </div>
               )}
             </>
-          )}
-
-          {situationCounts.length > 0 && (
-            <button
-              type="button"
-              onClick={onConsultarHorario}
-              className="sticky bottom-0 rounded-2xl border border-hairline bg-white px-4 py-2.5 font-instrument text-sm font-semibold text-black shadow-[0_-8px_8px_-8px_rgba(0,0,0,0.1)] transition-all duration-200 hover:scale-[1.02] hover:border-brand hover:text-brand active:scale-95"
-            >
-              Consultar por horario
-            </button>
           )}
         </div>
       )}
