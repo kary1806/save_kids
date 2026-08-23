@@ -65,14 +65,14 @@ export default function ConditionsModal({
     }
 
     setLoading(true)
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
     Promise.all([
       supabase.from('report_categories').select('*'),
       supabase
         .from('reports')
         .select('category, situation, occurred_at')
-        .gte('occurred_at', thirtyDaysAgo)
+        .gte('occurred_at', sevenDaysAgo)
         .gte('latitude', coords.lat - NEARBY_DEGREES)
         .lte('latitude', coords.lat + NEARBY_DEGREES)
         .gte('longitude', coords.lng - NEARBY_DEGREES)
@@ -149,7 +149,7 @@ export default function ConditionsModal({
                 Sin reportes recientes para {TIME_LABEL[time]}
               </p>
               <p className="mt-1 font-instrument text-sm text-black/70">
-                No se han registrado situaciones cerca de este lugar en los últimos 30 días para
+                No se han registrado situaciones cerca de este lugar en los últimos 7 días para
                 este horario. Aun así, mantente alerta a tu entorno y comparte tu ubicación con
                 alguien de confianza.
               </p>
@@ -167,10 +167,10 @@ export default function ConditionsModal({
                   return (
                     <div key={item.situation} className="flex items-center gap-3">
                       <span
-                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
-                        style={{ backgroundColor: item.color }}
+                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
+                        style={{ backgroundColor: `${item.color}20` }}
                       >
-                        <Icon className="h-4 w-4 text-white" />
+                        <Icon className="h-4 w-4" style={{ color: item.color }} />
                       </span>
                       <span className="font-instrument text-sm text-black">{item.situation}</span>
                     </div>
@@ -198,7 +198,7 @@ export default function ConditionsModal({
         )}
 
         <div className="mt-6 flex items-center gap-2 font-instrument text-sm text-black/60">
-          {lastUpdated ? formatLastUpdated(lastUpdated) : 'Basado en reportes de los últimos 30 días'}
+          {lastUpdated ? formatLastUpdated(lastUpdated) : 'Basado en reportes de los últimos 7 días'}
           <Info className="h-4 w-4 flex-shrink-0 text-black/40" />
         </div>
       </div>
