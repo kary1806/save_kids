@@ -448,8 +448,8 @@ export default function Dashboard() {
             disableDefaultUI={false}
             className="h-full w-full"
             onClick={(e) => {
-              if (pickingLocation && e.latLng) {
-                setPickedLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+              if (pickingLocation && e.detail.latLng) {
+                setPickedLocation({ lat: e.detail.latLng.lat, lng: e.detail.latLng.lng })
                 setPickingLocation(false)
                 return
               }
