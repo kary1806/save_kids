@@ -13,6 +13,23 @@ const RISK_ITEMS = [
   { label: 'Accidente', icon: CarFront, color: '#f59e0b' },
 ]
 
+const PREVENTIVE_TIPS: Record<string, string> = {
+  Robo: 'Evita mostrar objetos de valor y camina por vías principales.',
+  'Poca iluminación': 'Prefiere rutas bien iluminadas y evita transitar solo de noche.',
+  Accidente: 'Cruza por zonas señalizadas y mantente atento al tráfico.',
+  Violencia: 'Evita confrontaciones y busca ayuda de las autoridades si notas riesgo.',
+  'Persona Sospechosa': 'Mantente alerta y comparte tu ubicación con alguien de confianza.',
+  Tráfico: 'Prevé tiempo adicional y usa siempre los cruces peatonales.',
+  'Cruce Peligroso': 'Cruza por la cebra y espera el cambio de semáforo.',
+  'Vía en mal estado': 'Camina con cuidado y evita ir distraído con el celular.',
+  Inundación: 'Evita zonas bajas y no cruces corrientes de agua.',
+  'Lluvias intensas': 'Busca refugio y evita desplazarte durante la tormenta.',
+  Deslizamiento: 'Aléjate de laderas inestables, sobre todo tras lluvias fuertes.',
+  Acoso: 'Busca zonas concurridas y avisa a alguien de confianza.',
+  'Alta circulación vehicular': 'Extrema precaución al cruzar y usa puentes peatonales si existen.',
+  Otro: 'Mantente alerta a tu entorno y comparte tu ubicación con alguien de confianza.',
+}
+
 export default function ConditionsModal({
   placeName,
   address,
@@ -73,10 +90,16 @@ export default function ConditionsModal({
             <p className="font-instrument text-base font-semibold text-black">
               Recomendaciones preventivas
             </p>
-            <p className="mt-4 font-instrument text-sm text-black/80">
-              Considera utilizar vías principales, evita zonas poco iluminadas y desplázate
-              acompañado.
-            </p>
+            <ul className="mt-4 flex flex-col gap-2">
+              {RISK_ITEMS.map((item) => (
+                <li
+                  key={item.label}
+                  className="font-instrument text-sm text-black/80 before:mr-1.5 before:content-['•']"
+                >
+                  {PREVENTIVE_TIPS[item.label] ?? PREVENTIVE_TIPS.Otro}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 

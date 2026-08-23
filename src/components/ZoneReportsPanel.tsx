@@ -24,7 +24,7 @@ const HOURLY_REPORTS = [
 const PEAK_HOURS = ['18', '20', '22']
 const maxValue = Math.max(...HOURLY_REPORTS.map((h) => h.value))
 
-export default function ZoneReportsPanel() {
+export default function ZoneReportsPanel({ onConsultarHorario }: { onConsultarHorario: () => void }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -102,6 +102,7 @@ export default function ZoneReportsPanel() {
 
           <button
             type="button"
+            onClick={onConsultarHorario}
             className="rounded-2xl border border-hairline px-4 py-2.5 font-instrument text-sm font-semibold text-black transition-all duration-200 hover:scale-[1.02] hover:border-brand hover:text-brand active:scale-95"
           >
             Consultar por horario

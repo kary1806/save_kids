@@ -6,7 +6,6 @@ import 'leaflet/dist/leaflet.css'
 import {
   ShieldCheck,
   Home,
-  Map as MapIcon,
   TriangleAlert,
   Route,
   MapPin,
@@ -29,46 +28,23 @@ import ProfileModal from '../components/ProfileModal'
 import SettingsModal from '../components/SettingsModal'
 import HelpModal from '../components/HelpModal'
 
-const CATEGORIES = [
-  { key: 'todo', label: 'Todo' },
-  { key: 'seguridad', label: 'Seguridad Ciudadana' },
-  { key: 'vial', label: 'Riesgo Vial' },
-  { key: 'ambiental', label: 'Ambiental' },
-  { key: 'nna', label: 'Protección NNA' },
-  { key: 'escolar', label: 'Entorno Escolar' },
-] as const
-
-type RiskLevel = 'safe' | 'medium' | 'high'
-
-const RISK_COLOR: Record<RiskLevel, string> = {
-  safe: '#16a34a',
-  medium: '#f59e0b',
-  high: '#dc2626',
-}
-
-const RISK_LABEL: Record<RiskLevel, string> = {
-  safe: 'Riesgo bajo',
-  medium: 'Riesgo medio',
-  high: 'Riesgo alto',
-}
+type MapCategory = { key: string; label: string; color: string }
 
 const ZONES: {
   id: string
   name: string
-  category: (typeof CATEGORIES)[number]['key']
-  risk: RiskLevel
+  category: string
   lat: number
   lng: number
 }[] = [
-  { id: '1', name: 'Castellana', category: 'seguridad', risk: 'safe', lat: 10.4058, lng: -75.4863 },
-  { id: '2', name: 'Getsemaní', category: 'escolar', risk: 'medium', lat: 10.4185, lng: -75.5453 },
-  { id: '3', name: 'Centro', category: 'vial', risk: 'medium', lat: 10.4236, lng: -75.5497 },
-  { id: '4', name: 'El Bosque', category: 'ambiental', risk: 'safe', lat: 10.3891, lng: -75.4954 },
-  { id: '5', name: 'Pie del Cerro', category: 'nna', risk: 'high', lat: 10.4102, lng: -75.5321 },
+  { id: '1', name: 'Castellana', category: 'seguridad', lat: 10.4058, lng: -75.4863 },
+  { id: '2', name: 'Getsemaní', category: 'escolar', lat: 10.4185, lng: -75.5453 },
+  { id: '3', name: 'Centro', category: 'vial', lat: 10.4236, lng: -75.5497 },
+  { id: '4', name: 'El Bosque', category: 'ambiental', lat: 10.3891, lng: -75.4954 },
+  { id: '5', name: 'Pie del Cerro', category: 'nna', lat: 10.4102, lng: -75.5321 },
 ]
 
-function riskIcon(risk: RiskLevel) {
-  const color = RISK_COLOR[risk]
+function categoryIcon(color: string) {
   return L.divIcon({
     className: '',
     html: `<div style="width:24px;height:24px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
@@ -79,7 +55,6 @@ function riskIcon(risk: RiskLevel) {
 
 const NAV_ITEMS = [
   { label: 'Inicio', icon: Home, color: '#000000' },
-  { label: 'Mapa', icon: MapIcon, color: '#2563eb' },
   { label: 'Reportar Situación', icon: TriangleAlert, color: '#f97316' },
   { label: 'Rutas', icon: Route, color: '#16a34a' },
   { label: 'Tú zona', icon: MapPin, color: '#000000' },
@@ -186,7 +161,8 @@ function Sidebar({
 export default function Dashboard() {
   const { session, loading } = useSession()
   const navigate = useNavigate()
-  const [category, setCategory] = useState<(typeof CATEGORIES)[number]['key']>('todo')
+  const [category, setCategory] = useState('todo')
+  const [mapCategories, setMapCategories] = useState<MapCategory[]>([])
   const [menuOpen, setMenuOpen] = useState(false)
   const [timeModalOpen, setTimeModalOpen] = useState(false)
   const [selectedTime, setSelectedTime] = useState<TimeOfDay | null>(null)
@@ -205,10 +181,27 @@ export default function Dashboard() {
     if (!loading && !session) navigate('/login')
   }, [loading, session, navigate])
 
+  useEffect(() => {
+    supabase
+      .from('report_categories')
+      .select('*')
+      .order('sort_order')
+      .then(({ data }) => setMapCategories(data ?? []))
+  }, [])
+
+  const filterOptions = useMemo(
+    () => [{ key: 'todo', label: 'Todo', color: '#000000' }, ...mapCategories],
+    [mapCategories],
+  )
+
   const visibleZones = useMemo(
     () => (category === 'todo' ? ZONES : ZONES.filter((z) => z.category === category)),
     [category],
   )
+
+  function categoryColor(key: string) {
+    return mapCategories.find((c) => c.key === key)?.color ?? '#6b7280'
+  }
 
   if (loading || !session) return null
 
@@ -224,7 +217,6 @@ export default function Dashboard() {
 
   function handleNavClick(label: string) {
     setActiveNav(label)
-    if (label === 'Mapa') setTimeModalOpen(true)
     if (label === 'Reportar Situación') setReportModalOpen(true)
   }
 
@@ -311,16 +303,17 @@ export default function Dashboard() {
         </header>
 
         <div className="flex gap-2 overflow-x-auto px-4 py-3 sm:px-6">
-          {CATEGORIES.map((cat) => (
+          {filterOptions.map((cat) => (
             <button
               key={cat.key}
               type="button"
               onClick={() => setCategory(cat.key)}
-              className={`flex-shrink-0 rounded-full border px-4 py-1.5 font-instrument text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 ${
+              className="flex-shrink-0 rounded-full border px-4 py-1.5 font-instrument text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95"
+              style={
                 category === cat.key
-                  ? 'border-brand bg-brand text-white shadow-md'
-                  : 'border-hairline text-black hover:border-brand hover:text-brand'
-              }`}
+                  ? { backgroundColor: cat.color, borderColor: cat.color, color: '#fff' }
+                  : { borderColor: '#afafaf', color: '#000' }
+              }
             >
               {cat.label}
             </button>
@@ -328,7 +321,7 @@ export default function Dashboard() {
         </div>
 
         <div className="relative flex-1">
-          <ZoneReportsPanel />
+          <ZoneReportsPanel onConsultarHorario={() => setTimeModalOpen(true)} />
           <MapContainer
             center={[10.406, -75.5144]}
             zoom={13}
@@ -340,11 +333,15 @@ export default function Dashboard() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {visibleZones.map((zone) => (
-              <Marker key={zone.id} position={[zone.lat, zone.lng]} icon={riskIcon(zone.risk)}>
+              <Marker
+                key={zone.id}
+                position={[zone.lat, zone.lng]}
+                icon={categoryIcon(categoryColor(zone.category))}
+              >
                 <Popup>
                   <strong>{zone.name}</strong>
                   <br />
-                  {RISK_LABEL[zone.risk]}
+                  {mapCategories.find((c) => c.key === zone.category)?.label}
                 </Popup>
               </Marker>
             ))}
@@ -355,15 +352,13 @@ export default function Dashboard() {
               Información del Mapa
             </p>
             <div className="flex flex-col gap-1">
-              {(Object.keys(RISK_COLOR) as RiskLevel[]).map((risk) => (
-                <div key={risk} className="flex items-center gap-2">
+              {mapCategories.map((cat) => (
+                <div key={cat.key} className="flex items-center gap-2">
                   <span
                     className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: RISK_COLOR[risk] }}
+                    style={{ backgroundColor: cat.color }}
                   />
-                  <span className="font-instrument text-xs text-black/70">
-                    {RISK_LABEL[risk]}
-                  </span>
+                  <span className="font-instrument text-xs text-black/70">{cat.label}</span>
                 </div>
               ))}
             </div>
