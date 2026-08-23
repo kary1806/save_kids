@@ -1,14 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useMapsLibrary } from '@vis.gl/react-google-maps'
 
-// Restrict suggestions to the Cartagena metro area for now.
-const CARTAGENA_BOUNDS = {
-  south: 10.28,
-  west: -75.62,
-  north: 10.52,
-  east: -75.38,
-}
-
 export type SelectedPlace = { address: string; lat: number; lng: number }
 
 type PlacePredictionLike = {
@@ -21,10 +13,12 @@ type PlacePredictionLike = {
 export default function PlaceAutocompleteInput({
   placeholder,
   className,
+  biasCenter,
   onPlaceSelected,
 }: {
   placeholder: string
   className?: string
+  biasCenter?: { lat: number; lng: number } | null
   onPlaceSelected: (place: SelectedPlace) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -37,14 +31,14 @@ export default function PlaceAutocompleteInput({
     const PlaceAutocompleteElement = (
       placesLibrary as unknown as {
         PlaceAutocompleteElement: new (options: {
-          locationRestriction: typeof CARTAGENA_BOUNDS
+          locationBias?: { radius: number; center: { lat: number; lng: number } }
         }) => HTMLElement
       }
     ).PlaceAutocompleteElement
 
-    const autocompleteEl = new PlaceAutocompleteElement({
-      locationRestriction: CARTAGENA_BOUNDS,
-    })
+    const autocompleteEl = new PlaceAutocompleteElement(
+      biasCenter ? { locationBias: { radius: 50000, center: biasCenter } } : {},
+    )
 
     autocompleteEl.setAttribute('class', className ?? 'w-full min-w-0')
     autocompleteEl.setAttribute('placeholder', placeholder)
@@ -77,7 +71,7 @@ export default function PlaceAutocompleteInput({
       autocompleteEl.removeEventListener('gmp-select', handleSelect)
       container.removeChild(autocompleteEl)
     }
-  }, [placesLibrary, placeholder, className])
+  }, [placesLibrary, placeholder, className, biasCenter?.lat, biasCenter?.lng])
 
   return <div ref={containerRef} className="w-full min-w-0" />
 }

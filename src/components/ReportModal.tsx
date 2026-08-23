@@ -296,6 +296,7 @@ export default function ReportModal({
               <PlaceAutocompleteInput
                 placeholder="Ej. Av. Pedro de heredia"
                 className="w-full min-w-0 font-instrument text-sm text-black outline-none"
+                biasCenter={userLocation}
                 onPlaceSelected={(place) => {
                   setLocation(place.address)
                   setCoords({ lat: place.lat, lng: place.lng })

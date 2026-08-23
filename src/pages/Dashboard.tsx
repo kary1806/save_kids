@@ -15,8 +15,11 @@ import {
   X,
   Users,
   LogOut,
+  Moon,
+  Sun,
 } from 'lucide-react'
 import { useSession } from '../lib/useSession'
+import { useTheme } from '../lib/useTheme'
 import { supabase } from '../lib/supabase'
 import ZoneReportsPanel from '../components/ZoneReportsPanel'
 import TimeSelectorModal, { type TimeOfDay } from '../components/TimeSelectorModal'
@@ -26,6 +29,7 @@ import PlaceAutocompleteInput from '../components/PlaceAutocompleteInput'
 import ProfileModal from '../components/ProfileModal'
 import SettingsModal from '../components/SettingsModal'
 import HelpModal from '../components/HelpModal'
+import MyReportsModal from '../components/MyReportsModal'
 
 type MapCategory = { key: string; label: string; color: string }
 type ReportMarker = {
@@ -62,17 +66,17 @@ function Sidebar({
   onOpenHelp: () => void
 }) {
   return (
-    <div className="flex h-full w-64 flex-col px-4 py-6">
+    <div className="flex h-full w-64 flex-col bg-white px-4 py-6 dark:bg-gray-900">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-6 w-6 text-brand" />
-          <span className="font-instrument text-lg font-bold text-black">
+          <span className="font-instrument text-lg font-bold text-black dark:text-white">
             SAFE <span className="text-brand">KIDS</span>
           </span>
         </div>
         {onClose && (
           <button type="button" onClick={onClose} aria-label="Cerrar menú" className="md:hidden">
-            <X className="h-5 w-5 text-black/60" />
+            <X className="h-5 w-5 text-black/60 dark:text-white/60" />
           </button>
         )}
       </div>
@@ -86,7 +90,9 @@ function Sidebar({
               type="button"
               onClick={() => onNavClick(item.label)}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm transition-colors duration-200 ${
-                isActive ? 'bg-brand text-white' : 'text-black hover:bg-brand/5'
+                isActive
+                  ? 'bg-brand text-white'
+                  : 'text-black hover:bg-brand/5 dark:text-white dark:hover:bg-white/5'
               }`}
             >
               <item.icon
@@ -99,11 +105,11 @@ function Sidebar({
         })}
       </nav>
 
-      <div className="mt-6 flex flex-col gap-1 border-t border-hairline pt-6">
+      <div className="mt-6 flex flex-col gap-1 border-t border-hairline pt-6 dark:border-white/10">
         <button
           type="button"
           onClick={onOpenSettings}
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5 dark:text-white/60 dark:hover:bg-white/5"
         >
           <Settings className="h-5 w-5 flex-shrink-0" />
           Configuración
@@ -111,7 +117,7 @@ function Sidebar({
         <button
           type="button"
           onClick={onOpenHelp}
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5 dark:text-white/60 dark:hover:bg-white/5"
         >
           <HelpCircle className="h-5 w-5 flex-shrink-0" />
           Ayuda
@@ -119,23 +125,23 @@ function Sidebar({
         <button
           type="button"
           onClick={onSignOut}
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-red-50 hover:text-red-600"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-red-50 hover:text-red-600 dark:text-white/60"
         >
           <LogOut className="h-5 w-5 flex-shrink-0" />
           Cerrar sesión
         </button>
       </div>
 
-      <div className="mt-auto overflow-hidden rounded-xl border border-hairline">
+      <div className="mt-auto overflow-hidden rounded-xl border border-hairline dark:border-white/10">
         <div className="flex items-center justify-center gap-3 bg-brand/10 py-6">
           <Users className="h-7 w-7 text-brand" />
           <ShieldCheck className="h-9 w-9 text-brand" />
         </div>
-        <div className="bg-white p-4">
+        <div className="bg-white p-4 dark:bg-gray-900">
           <p className="font-instrument text-sm font-semibold text-brand">
             Tu información hace la diferencia
           </p>
-          <p className="mt-1 font-instrument text-xs text-black/60">
+          <p className="mt-1 font-instrument text-xs text-black/60 dark:text-white/60">
             Reporta y consulta para tener una ciudad más segura.
           </p>
         </div>
@@ -147,6 +153,7 @@ function Sidebar({
 export default function Dashboard() {
   const { session, loading } = useSession()
   const navigate = useNavigate()
+  const { theme, toggleTheme } = useTheme()
   const [category, setCategory] = useState('todo')
   const [mapCategories, setMapCategories] = useState<MapCategory[]>([])
   const [menuOpen, setMenuOpen] = useState(false)
@@ -156,6 +163,7 @@ export default function Dashboard() {
   const [profileModalOpen, setProfileModalOpen] = useState(false)
   const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const [helpModalOpen, setHelpModalOpen] = useState(false)
+  const [myReportsModalOpen, setMyReportsModalOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('Inicio')
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [searchedPlace, setSearchedPlace] = useState<{ lat: number; lng: number } | null>(null)
@@ -256,11 +264,12 @@ export default function Dashboard() {
     setActiveNav(label)
     if (label === 'Reportar Situación') setReportModalOpen(true)
     if (label === 'Tu perfil') setProfileModalOpen(true)
+    if (label === 'Rutas') setMyReportsModalOpen(true)
   }
 
   return (
     <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
-    <div className="flex h-screen w-full overflow-hidden bg-white">
+    <div className="flex h-screen w-full overflow-hidden bg-white dark:bg-gray-950">
       <aside className="hidden flex-shrink-0 border-r border-hairline md:flex">
         <Sidebar
           activeNav={activeNav}
@@ -302,27 +311,37 @@ export default function Dashboard() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex flex-wrap items-center gap-3 border-b border-hairline px-4 py-4 sm:px-6">
+        <header className="flex flex-wrap items-center gap-3 border-b border-hairline px-4 py-4 dark:border-white/10 sm:px-6">
           <button
             type="button"
             aria-label="Abrir menú"
             onClick={() => setMenuOpen(true)}
             className="md:hidden"
           >
-            <Menu className="h-6 w-6 text-black" />
+            <Menu className="h-6 w-6 text-black dark:text-white" />
           </button>
 
-          <div className="flex min-w-[140px] flex-1 items-center gap-2 rounded-full border border-hairline px-4 py-2">
-            <Search className="h-4 w-4 flex-shrink-0 text-black/40" />
+          <div className="flex min-w-[140px] flex-1 items-center gap-2 rounded-full border border-hairline px-4 py-2 dark:border-white/20">
+            <Search className="h-4 w-4 flex-shrink-0 text-black/40 dark:text-white/40" />
             <PlaceAutocompleteInput
               placeholder={locationStatus === 'granted' ? 'Tu ubicación actual' : '¿A dónde vas?'}
               className="w-full min-w-0 font-instrument text-sm text-black outline-none"
+              biasCenter={userLocation}
               onPlaceSelected={(place) => setSearchedPlace({ lat: place.lat, lng: place.lng })}
             />
           </div>
 
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+            className="flex flex-shrink-0 items-center justify-center rounded-full border border-hairline p-2 text-black transition-transform duration-200 hover:rotate-12 hover:scale-110 dark:border-white/20 dark:text-white"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+
           <button type="button" aria-label="Notificaciones" className="flex-shrink-0">
-            <Bell className="h-5 w-5 text-black/70" />
+            <Bell className="h-5 w-5 text-black/70 dark:text-white/70" />
           </button>
 
           <button
@@ -335,8 +354,14 @@ export default function Dashboard() {
               {initial}
             </span>
             <div className="hidden text-left sm:block">
-              <p className="font-instrument text-sm font-medium text-black">{displayName}</p>
-              {role && <p className="font-instrument text-xs capitalize text-black/50">{role}</p>}
+              <p className="font-instrument text-sm font-medium text-black dark:text-white">
+                {displayName}
+              </p>
+              {role && (
+                <p className="font-instrument text-xs capitalize text-black/50 dark:text-white/50">
+                  {role}
+                </p>
+              )}
             </div>
           </button>
         </header>
@@ -351,7 +376,7 @@ export default function Dashboard() {
               style={
                 category === cat.key
                   ? { backgroundColor: cat.color, borderColor: cat.color, color: '#fff' }
-                  : { borderColor: cat.color, color: '#000' }
+                  : { borderColor: cat.color, color: theme === 'dark' ? '#fff' : '#000' }
               }
             >
               {category !== cat.key && (
@@ -475,6 +500,10 @@ export default function Dashboard() {
       {settingsModalOpen && <SettingsModal onClose={() => setSettingsModalOpen(false)} />}
 
       {helpModalOpen && <HelpModal onClose={() => setHelpModalOpen(false)} />}
+
+      {myReportsModalOpen && (
+        <MyReportsModal userId={session.user.id} onClose={() => setMyReportsModalOpen(false)} />
+      )}
     </div>
     </APIProvider>
   )
