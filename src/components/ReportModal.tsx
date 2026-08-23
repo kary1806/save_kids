@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X, MapPin, Clock, Send, CloudCheck, ShieldCheck, Lock, Users } from 'lucide-react'
+import { useMapsLibrary } from '@vis.gl/react-google-maps'
 import { supabase } from '../lib/supabase'
 
 const CONFIRMATION_ITEMS = [
@@ -34,6 +35,9 @@ export default function ReportModal({
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const [selections, setSelections] = useState<Selection[]>([])
   const [location, setLocation] = useState('')
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const locationContainerRef = useRef<HTMLDivElement>(null)
+  const placesLibrary = useMapsLibrary('places')
   const [when, setWhen] = useState(() => new Date().toISOString().slice(0, 16))
   const [description, setDescription] = useState('')
   const [confirmed, setConfirmed] = useState(false)
@@ -51,6 +55,60 @@ export default function ReportModal({
       setLoadingOptions(false)
     })
   }, [])
+
+  useEffect(() => {
+    if (!placesLibrary || !locationContainerRef.current) return
+
+    const container = locationContainerRef.current
+    const PlaceAutocompleteElement = (
+      placesLibrary as unknown as {
+        PlaceAutocompleteElement: new (options: {
+          locationBias: { radius: number; center: { lat: number; lng: number } }
+        }) => HTMLElement
+      }
+    ).PlaceAutocompleteElement
+
+    const autocompleteEl = new PlaceAutocompleteElement({
+      locationBias: { radius: 50000, center: { lat: 10.406, lng: -75.5144 } },
+    })
+    autocompleteEl.setAttribute(
+      'class',
+      'w-full min-w-0 font-instrument text-sm text-black outline-none',
+    )
+    ;(autocompleteEl as HTMLElement & { placeholder?: string }).setAttribute(
+      'placeholder',
+      'Ej. Av. Pedro de heredia',
+    )
+    container.appendChild(autocompleteEl)
+
+    async function handleSelect(event: Event) {
+      const placePrediction = (
+        event as unknown as {
+          placePrediction?: {
+            toPlace: () => { fetchFields: (opts: { fields: string[] }) => Promise<void> } & Record<
+              string,
+              unknown
+            >
+          }
+        }
+      ).placePrediction
+      if (!placePrediction) return
+
+      const place = placePrediction.toPlace()
+      await place.fetchFields({ fields: ['formattedAddress', 'displayName', 'location'] })
+
+      const placeLocation = place.location as { lat: () => number; lng: () => number } | undefined
+      setLocation((place.formattedAddress as string) ?? (place.displayName as string) ?? '')
+      setCoords(placeLocation ? { lat: placeLocation.lat(), lng: placeLocation.lng() } : null)
+    }
+
+    autocompleteEl.addEventListener('gmp-select', handleSelect)
+
+    return () => {
+      autocompleteEl.removeEventListener('gmp-select', handleSelect)
+      container.removeChild(autocompleteEl)
+    }
+  }, [placesLibrary])
 
   const canSubmit = Boolean(selections.length > 0 && location && when && confirmed)
 
@@ -85,6 +143,8 @@ export default function ReportModal({
         category: s.categoryKey,
         situation: s.label,
         location,
+        latitude: coords?.lat ?? null,
+        longitude: coords?.lng ?? null,
         occurred_at: new Date(when).toISOString(),
         description: description || null,
       })),
@@ -264,14 +324,11 @@ export default function ReportModal({
             </span>
             <div className="flex items-center gap-2 rounded-lg border border-hairline px-3 py-2">
               <MapPin className="h-4 w-4 flex-shrink-0 text-black/40" />
-              <input
-                type="text"
-                placeholder="Ej. Av. Pedro de heredia"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full min-w-0 font-instrument text-sm text-black outline-none placeholder:text-black/40"
-              />
+              <div ref={locationContainerRef} className="w-full min-w-0" />
             </div>
+            {location && (
+              <p className="font-instrument text-xs text-brand">📍 {location}</p>
+            )}
           </label>
 
           <label className="flex flex-col gap-1.5">

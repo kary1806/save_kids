@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow } from '@vis.gl/react-google-maps'
 import {
   ShieldCheck,
   Home,
@@ -29,44 +27,16 @@ import SettingsModal from '../components/SettingsModal'
 import HelpModal from '../components/HelpModal'
 
 type MapCategory = { key: string; label: string; color: string }
-
-const ZONES: {
+type ReportMarker = {
   id: string
-  name: string
   category: string
-  lat: number
-  lng: number
-}[] = [
-  { id: '1', name: 'Castellana', category: 'seguridad', lat: 10.4058, lng: -75.4863 },
-  { id: '2', name: 'Getsemaní', category: 'escolar', lat: 10.4185, lng: -75.5453 },
-  { id: '3', name: 'Centro', category: 'vial', lat: 10.4236, lng: -75.5497 },
-  { id: '4', name: 'El Bosque', category: 'ambiental', lat: 10.3891, lng: -75.4954 },
-  { id: '5', name: 'Pie del Cerro', category: 'nna', lat: 10.4102, lng: -75.5321 },
-]
-
-function categoryIcon(color: string) {
-  return L.divIcon({
-    className: '',
-    html: `<div style="width:24px;height:24px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 24],
-  })
+  situation: string
+  latitude: number
+  longitude: number
 }
 
-const userLocationIcon = L.divIcon({
-  className: '',
-  html: `<div style="width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid white;box-shadow:0 0 0 4px rgba(37,99,235,0.3)"></div>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-})
-
-function RecenterMap({ location }: { location: { lat: number; lng: number } | null }) {
-  const map = useMap()
-  useEffect(() => {
-    if (location) map.setView([location.lat, location.lng], 14)
-  }, [location, map])
-  return null
-}
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+const CARTAGENA_CENTER = { lat: 10.406, lng: -75.5144 }
 
 const NAV_ITEMS = [
   { label: 'Inicio', icon: Home, color: '#000000' },
@@ -188,6 +158,8 @@ export default function Dashboard() {
   const [activeNav, setActiveNav] = useState('Inicio')
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [locationStatus, setLocationStatus] = useState<'pending' | 'granted' | 'denied'>('pending')
+  const [reportMarkers, setReportMarkers] = useState<ReportMarker[]>([])
+  const [selectedMarker, setSelectedMarker] = useState<ReportMarker | null>(null)
 
   const selectedPlace = {
     name: 'Centro Comercial Caribe Plaza',
@@ -220,18 +192,29 @@ export default function Dashboard() {
       .then(({ data }) => setMapCategories(data ?? []))
   }, [])
 
+  useEffect(() => {
+    let query = supabase
+      .from('reports')
+      .select('id, category, situation, latitude, longitude')
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
+
+    if (category !== 'todo') query = query.eq('category', category)
+
+    query.then(({ data }) => setReportMarkers(data ?? []))
+  }, [category])
+
   const filterOptions = useMemo(
     () => [{ key: 'todo', label: 'Todo', color: '#000000' }, ...mapCategories],
     [mapCategories],
   )
 
-  const visibleZones = useMemo(
-    () => (category === 'todo' ? ZONES : ZONES.filter((z) => z.category === category)),
-    [category],
-  )
-
   function categoryColor(key: string) {
     return mapCategories.find((c) => c.key === key)?.color ?? '#6b7280'
+  }
+
+  function categoryLabel(key: string) {
+    return mapCategories.find((c) => c.key === key)?.label ?? key
   }
 
   if (loading || !session) return null
@@ -253,6 +236,7 @@ export default function Dashboard() {
   }
 
   return (
+    <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
     <div className="flex h-screen w-full overflow-hidden bg-white">
       <aside className="hidden flex-shrink-0 border-r border-hairline md:flex">
         <Sidebar
@@ -364,36 +348,49 @@ export default function Dashboard() {
             locationStatus={locationStatus}
             onConsultarHorario={() => setTimeModalOpen(true)}
           />
-          <MapContainer
-            center={[10.406, -75.5144]}
-            zoom={13}
-            scrollWheelZoom
+          <Map
+            mapId="DEMO_MAP_ID"
+            defaultCenter={CARTAGENA_CENTER}
+            center={userLocation ?? undefined}
+            defaultZoom={13}
+            zoom={userLocation ? 14 : undefined}
+            disableDefaultUI={false}
             className="h-full w-full"
+            onClick={() => setSelectedMarker(null)}
           >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <RecenterMap location={userLocation} />
             {userLocation && (
-              <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
-                <Popup>Tu ubicación</Popup>
-              </Marker>
+              <AdvancedMarker position={userLocation}>
+                <div className="h-4 w-4 rounded-full border-[3px] border-white bg-blue-600 shadow-[0_0_0_4px_rgba(37,99,235,0.3)]" />
+              </AdvancedMarker>
             )}
-            {visibleZones.map((zone) => (
-              <Marker
-                key={zone.id}
-                position={[zone.lat, zone.lng]}
-                icon={categoryIcon(categoryColor(zone.category))}
+
+            {reportMarkers.map((marker) => (
+              <AdvancedMarker
+                key={marker.id}
+                position={{ lat: marker.latitude, lng: marker.longitude }}
+                onClick={() => setSelectedMarker(marker)}
               >
-                <Popup>
-                  <strong>{zone.name}</strong>
-                  <br />
-                  {mapCategories.find((c) => c.key === zone.category)?.label}
-                </Popup>
-              </Marker>
+                <Pin
+                  background={categoryColor(marker.category)}
+                  borderColor="#ffffff"
+                  glyphColor="#ffffff"
+                />
+              </AdvancedMarker>
             ))}
-          </MapContainer>
+
+            {selectedMarker && (
+              <InfoWindow
+                position={{ lat: selectedMarker.latitude, lng: selectedMarker.longitude }}
+                onCloseClick={() => setSelectedMarker(null)}
+              >
+                <div className="font-instrument text-sm">
+                  <strong>{selectedMarker.situation}</strong>
+                  <br />
+                  {categoryLabel(selectedMarker.category)}
+                </div>
+              </InfoWindow>
+            )}
+          </Map>
 
           <div className="absolute bottom-4 left-4 z-[1000] rounded-lg border border-hairline bg-white px-4 py-3 shadow-lg">
             <p className="mb-2 font-instrument text-xs font-semibold text-black">
@@ -452,5 +449,6 @@ export default function Dashboard() {
 
       {helpModalOpen && <HelpModal onClose={() => setHelpModalOpen(false)} />}
     </div>
+    </APIProvider>
   )
 }
