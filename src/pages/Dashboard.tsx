@@ -208,10 +208,15 @@ export default function Dashboard() {
     navigate('/')
   }
 
+  function handleNavClick(label: string) {
+    setActiveNav(label)
+    if (label === 'Mapa') setTimeModalOpen(true)
+  }
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white">
       <aside className="hidden flex-shrink-0 border-r border-hairline md:flex">
-        <Sidebar activeNav={activeNav} onNavClick={setActiveNav} onSignOut={handleSignOut} />
+        <Sidebar activeNav={activeNav} onNavClick={handleNavClick} onSignOut={handleSignOut} />
       </aside>
 
       {menuOpen && (
@@ -220,7 +225,7 @@ export default function Dashboard() {
             <Sidebar
               activeNav={activeNav}
               onNavClick={(label) => {
-                setActiveNav(label)
+                handleNavClick(label)
                 setMenuOpen(false)
               }}
               onClose={() => setMenuOpen(false)}
@@ -289,7 +294,7 @@ export default function Dashboard() {
         </div>
 
         <div className="relative flex-1">
-          <ZoneReportsPanel onConsultarHorario={() => setTimeModalOpen(true)} />
+          <ZoneReportsPanel />
           <MapContainer
             center={[10.406, -75.5144]}
             zoom={13}
