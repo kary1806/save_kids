@@ -119,7 +119,7 @@ export default function ZoneReportsPanel({
       </button>
 
       {open && (
-        <div className="animate-fade-up mt-2 flex flex-col gap-4 rounded-2xl border border-hairline bg-white p-4 shadow-lg">
+        <div className="animate-fade-up mt-2 flex max-h-[calc(100vh-13rem)] flex-col gap-4 overflow-y-auto rounded-2xl border border-hairline bg-white p-4 shadow-lg">
           {locationStatus === 'pending' && (
             <p className="font-instrument text-sm text-black/40">Solicitando ubicación...</p>
           )}
@@ -267,7 +267,7 @@ export default function ZoneReportsPanel({
             <button
               type="button"
               onClick={onConsultarHorario}
-              className="rounded-2xl border border-hairline px-4 py-2.5 font-instrument text-sm font-semibold text-black transition-all duration-200 hover:scale-[1.02] hover:border-brand hover:text-brand active:scale-95"
+              className="sticky bottom-0 rounded-2xl border border-hairline bg-white px-4 py-2.5 font-instrument text-sm font-semibold text-black shadow-[0_-8px_8px_-8px_rgba(0,0,0,0.1)] transition-all duration-200 hover:scale-[1.02] hover:border-brand hover:text-brand active:scale-95"
             >
               Consultar por horario
             </button>
