@@ -8,7 +8,7 @@ import {
   Home,
   TriangleAlert,
   Route,
-  MapPin,
+  User,
   Settings,
   HelpCircle,
   Search,
@@ -57,7 +57,7 @@ const NAV_ITEMS = [
   { label: 'Inicio', icon: Home, color: '#000000' },
   { label: 'Reportar Situación', icon: TriangleAlert, color: '#f97316' },
   { label: 'Rutas', icon: Route, color: '#16a34a' },
-  { label: 'Tú zona', icon: MapPin, color: '#000000' },
+  { label: 'Tu perfil', icon: User, color: '#000000' },
 ]
 
 function Sidebar({
@@ -218,6 +218,7 @@ export default function Dashboard() {
   function handleNavClick(label: string) {
     setActiveNav(label)
     if (label === 'Reportar Situación') setReportModalOpen(true)
+    if (label === 'Tu perfil') setProfileModalOpen(true)
   }
 
   return (
