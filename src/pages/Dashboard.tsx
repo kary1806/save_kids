@@ -187,6 +187,10 @@ export default function Dashboard() {
   const [selectedMarker, setSelectedMarker] = useState<ReportMarker | null>(null)
   const [reportsVersion, setReportsVersion] = useState(0)
 
+  const selectedCoords = searchedPlace
+    ? { lat: searchedPlace.lat, lng: searchedPlace.lng }
+    : userLocation
+
   const selectedPlace = searchedPlace
     ? {
         name: searchedPlace.address.split(',')[0],
@@ -522,6 +526,7 @@ export default function Dashboard() {
         <ConditionsModal
           placeName={selectedPlace.name}
           address={selectedPlace.address}
+          coords={selectedCoords}
           time={selectedTime}
           userInitial={initial}
           onClose={() => setSelectedTime(null)}

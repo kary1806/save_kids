@@ -1,43 +1,7 @@
 import { useEffect, useState } from 'react'
-import {
-  MapPin,
-  ChevronDown,
-  ChevronUp,
-  TriangleAlert,
-  ShieldCheck,
-  LocateFixed,
-  Siren,
-  ShieldAlert,
-  UserRoundSearch,
-  Lightbulb,
-  Car,
-  TrafficCone,
-  Construction,
-  Waves,
-  CloudRain,
-  Mountain,
-  UserRoundX,
-  CircleHelp,
-  type LucideIcon,
-} from 'lucide-react'
+import { MapPin, ChevronDown, ChevronUp, TriangleAlert, ShieldCheck, LocateFixed } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-
-const SITUATION_ICONS: Record<string, LucideIcon> = {
-  Robo: Siren,
-  Violencia: ShieldAlert,
-  'Persona Sospechosa': UserRoundSearch,
-  'Poca iluminación': Lightbulb,
-  Tráfico: Car,
-  'Cruce Peligroso': TrafficCone,
-  Accidente: TriangleAlert,
-  'Vía en mal estado': Construction,
-  Inundación: Waves,
-  'Lluvias intensas': CloudRain,
-  Deslizamiento: Mountain,
-  Acoso: UserRoundX,
-  'Alta circulación vehicular': Car,
-  Otro: CircleHelp,
-}
+import { situationIcon } from '../lib/situationIcons'
 
 type CategoryInfo = { key: string; label: string; color: string }
 type SituationInfo = { id: string; category_key: string; label: string }
@@ -223,7 +187,7 @@ export default function ZoneReportsPanel({
 
                   <div className="mt-3 flex flex-col gap-2">
                     {situationCounts.map((report) => {
-                      const Icon = SITUATION_ICONS[report.situation] ?? CircleHelp
+                      const Icon = situationIcon(report.situation)
                       return (
                         <div
                           key={`${report.category}-${report.situation}`}
