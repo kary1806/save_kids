@@ -353,6 +353,7 @@ export default function Dashboard() {
           placeName={selectedPlace.name}
           address={selectedPlace.address}
           time={selectedTime}
+          userInitial={initial}
           onClose={() => setSelectedTime(null)}
         />
       )}

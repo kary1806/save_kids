@@ -1,4 +1,4 @@
-import { X, MapPin, Clock, ShoppingBag, Lightbulb, CarFront, TriangleAlert } from 'lucide-react'
+import { X, MapPin, Info, ShoppingBag, Lightbulb, CarFront } from 'lucide-react'
 import type { TimeOfDay } from './TimeSelectorModal'
 
 const TIME_LABEL: Record<TimeOfDay, string> = {
@@ -7,82 +7,83 @@ const TIME_LABEL: Record<TimeOfDay, string> = {
   night: 'la noche',
 }
 
-const RISK_TAGS = [
-  { label: 'Robo', icon: ShoppingBag, color: '#dc2626', bg: '#fee2e2' },
-  { label: 'Poca iluminación', icon: Lightbulb, color: '#6b7280', bg: '#f3f4f6' },
-  { label: 'Accidente', icon: CarFront, color: '#d97706', bg: '#fef3c7' },
+const RISK_ITEMS = [
+  { label: 'Robo', icon: ShoppingBag, color: '#ef4444' },
+  { label: 'Poca iluminación', icon: Lightbulb, color: '#ef4444' },
+  { label: 'Accidente', icon: CarFront, color: '#f59e0b' },
 ]
 
 export default function ConditionsModal({
   placeName,
   address,
   time,
+  userInitial,
   onClose,
 }: {
   placeName: string
   address: string
   time: TimeOfDay
+  userInitial: string
   onClose: () => void
 }) {
   return (
     <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/40 px-4">
-      <div className="animate-fade-up relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div className="animate-fade-up relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl sm:p-8">
         <button
           type="button"
           onClick={onClose}
           aria-label="Cerrar"
-          className="absolute right-4 top-4 text-black/40 transition-colors duration-200 hover:text-black"
+          className="absolute right-5 top-5 text-black transition-colors duration-200 hover:text-black/60"
         >
           <X className="h-5 w-5" />
         </button>
 
-        <h2 className="pr-6 font-instrument text-lg font-semibold text-black">{placeName}</h2>
-        <p className="mt-1 font-instrument text-sm text-black/60">
-          Condiciones y riesgos reportados para {TIME_LABEL[time]}
-        </p>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {RISK_TAGS.map((tag) => (
-            <span
-              key={tag.label}
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 font-instrument text-xs font-medium"
-              style={{ backgroundColor: tag.bg, color: tag.color }}
-            >
-              <tag.icon className="h-3.5 w-3.5" />
-              {tag.label}
-            </span>
-          ))}
+        <div className="flex flex-col items-center text-center">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand font-instrument text-base font-semibold text-white shadow-md">
+            {userInitial}
+          </span>
+          <h2 className="mt-3 font-instrument text-2xl font-bold text-black">{placeName}</h2>
+          <p className="mt-1 flex items-center gap-1.5 font-instrument text-sm text-black/60">
+            <MapPin className="h-4 w-4 flex-shrink-0 text-brand" />
+            {address}
+          </p>
         </div>
 
-        <div className="mt-4 flex items-start gap-2 rounded-xl bg-amber-50 p-3">
-          <TriangleAlert className="h-5 w-5 flex-shrink-0 text-amber-600" />
-          <div>
-            <p className="font-instrument text-sm font-semibold text-amber-800">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl bg-green-100 p-5">
+            <p className="font-instrument text-base font-semibold text-black">
+              Condiciones y riesgos reportados para {TIME_LABEL[time]}
+            </p>
+            <div className="mt-4 flex flex-col gap-3">
+              {RISK_ITEMS.map((item) => (
+                <div key={item.label} className="flex items-center gap-3">
+                  <span
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  >
+                    <item.icon className="h-4 w-4 text-white" />
+                  </span>
+                  <span className="font-instrument text-sm text-black">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-amber-100 p-5">
+            <p className="font-instrument text-base font-semibold text-black">
               Recomendaciones preventivas
             </p>
-            <p className="mt-0.5 font-instrument text-xs text-amber-800/80">
+            <p className="mt-4 font-instrument text-sm text-black/80">
               Considera utilizar vías principales, evita zonas poco iluminadas y desplázate
               acompañado.
             </p>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-2 font-instrument text-xs text-black/60">
-          <MapPin className="h-4 w-4 flex-shrink-0 text-black/40" />
-          {address}
+        <div className="mt-6 flex items-center gap-2 font-instrument text-sm text-black/60">
+          Última actualización: Hace 2 días
+          <Info className="h-4 w-4 flex-shrink-0 text-black/40" />
         </div>
-        <div className="mt-1 flex items-center gap-2 font-instrument text-xs text-black/40">
-          <Clock className="h-4 w-4 flex-shrink-0" />
-          Última actualización: hace 2 días
-        </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-5 w-full rounded-2xl bg-brand px-6 py-3 font-instrument font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.02] active:scale-95"
-        >
-          Entendido
-        </button>
       </div>
     </div>
   )
