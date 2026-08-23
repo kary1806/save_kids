@@ -308,20 +308,26 @@ export default function Dashboard() {
               key={cat.key}
               type="button"
               onClick={() => setCategory(cat.key)}
-              className="flex-shrink-0 rounded-full border px-4 py-1.5 font-instrument text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95"
+              className="flex flex-shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 font-instrument text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95"
               style={
                 category === cat.key
                   ? { backgroundColor: cat.color, borderColor: cat.color, color: '#fff' }
-                  : { borderColor: '#afafaf', color: '#000' }
+                  : { borderColor: cat.color, color: '#000' }
               }
             >
+              {category !== cat.key && (
+                <span
+                  className="h-2 w-2 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: cat.color }}
+                />
+              )}
               {cat.label}
             </button>
           ))}
         </div>
 
         <div className="relative flex-1">
-          <ZoneReportsPanel onConsultarHorario={() => setTimeModalOpen(true)} />
+          <ZoneReportsPanel category={category} onConsultarHorario={() => setTimeModalOpen(true)} />
           <MapContainer
             center={[10.406, -75.5144]}
             zoom={13}

@@ -1,31 +1,93 @@
-import { useState } from 'react'
-import { MapPin, ChevronDown, ChevronUp, TriangleAlert, Wallet, UserX, ShieldAlert, CircleHelp } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { MapPin, ChevronDown, ChevronUp, TriangleAlert, ShieldCheck } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
-const REPORT_TYPES = [
-  { label: 'Robo', count: 12, icon: Wallet, color: '#dc2626' },
-  { label: 'Acoso', count: 8, icon: UserX, color: '#9333ea' },
-  { label: 'Violencia', count: 5, icon: ShieldAlert, color: '#ea580c' },
-  { label: 'Otro', count: 3, icon: CircleHelp, color: '#6b7280' },
-]
+type CategoryInfo = { key: string; label: string; color: string }
+type SituationInfo = { id: string; category_key: string; label: string }
+type ReportRow = { id: string; category: string; situation: string; occurred_at: string }
 
-const HOURLY_REPORTS = [
-  { hour: '6', value: 2 },
-  { hour: '8', value: 3 },
-  { hour: '10', value: 2 },
-  { hour: '12', value: 4 },
-  { hour: '14', value: 3 },
-  { hour: '16', value: 5 },
-  { hour: '18', value: 9 },
-  { hour: '20', value: 11 },
-  { hour: '22', value: 7 },
-  { hour: '0', value: 2 },
-]
+type SituationCount = {
+  category: string
+  situation: string
+  color: string
+  count: number
+  situationId: string
+}
 
-const PEAK_HOURS = ['18', '20', '22']
-const maxValue = Math.max(...HOURLY_REPORTS.map((h) => h.value))
+const HOURS = ['0', '2', '4', '6', '8', '10', '12', '14', '16', '18', '20', '22']
 
-export default function ZoneReportsPanel({ onConsultarHorario }: { onConsultarHorario: () => void }) {
+function bucketHour(isoDate: string) {
+  const hour = new Date(isoDate).getHours()
+  const bucket = Math.floor(hour / 2) * 2
+  return String(bucket)
+}
+
+export default function ZoneReportsPanel({
+  category,
+  onConsultarHorario,
+}: {
+  category: string
+  onConsultarHorario: () => void
+}) {
   const [open, setOpen] = useState(false)
+  const [categories, setCategories] = useState<CategoryInfo[]>([])
+  const [situations, setSituations] = useState<SituationInfo[]>([])
+  const [reports, setReports] = useState<ReportRow[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('report_categories').select('*'),
+      supabase.from('report_situations').select('*'),
+    ]).then(([categoriesRes, situationsRes]) => {
+      setCategories(categoriesRes.data ?? [])
+      setSituations(situationsRes.data ?? [])
+    })
+  }, [])
+
+  useEffect(() => {
+    setLoading(true)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    let query = supabase
+      .from('reports')
+      .select('id, category, situation, occurred_at')
+      .gte('occurred_at', sevenDaysAgo)
+
+    if (category !== 'todo') query = query.eq('category', category)
+
+    query.then(({ data }) => {
+      setReports(data ?? [])
+      setLoading(false)
+    })
+  }, [category])
+
+  const situationCounts: SituationCount[] = Object.values(
+    reports.reduce<Record<string, SituationCount>>((acc, r) => {
+      const key = `${r.category}::${r.situation}`
+      const cat = categories.find((c) => c.key === r.category)
+      const situationInfo = situations.find(
+        (s) => s.category_key === r.category && s.label === r.situation,
+      )
+      if (!acc[key]) {
+        acc[key] = {
+          category: r.category,
+          situation: r.situation,
+          color: cat?.color ?? '#6b7280',
+          count: 0,
+          situationId: situationInfo?.id ?? '',
+        }
+      }
+      acc[key].count += 1
+      return acc
+    }, {}),
+  ).sort((a, b) => b.count - a.count || a.situationId.localeCompare(b.situationId))
+
+  const hourlyCounts = HOURS.map((hour) => ({
+    hour,
+    value: reports.filter((r) => bucketHour(r.occurred_at) === hour).length,
+  }))
+  const maxHourly = Math.max(1, ...hourlyCounts.map((h) => h.value))
+  const peakHour = hourlyCounts.reduce((max, h) => (h.value > max.value ? h : max), hourlyCounts[0])
 
   return (
     <div className="absolute right-4 top-4 z-[1000] w-72 max-w-[calc(100vw-2rem)]">
@@ -43,62 +105,90 @@ export default function ZoneReportsPanel({ onConsultarHorario }: { onConsultarHo
 
       {open && (
         <div className="animate-fade-up mt-2 flex flex-col gap-4 rounded-2xl border border-hairline bg-white p-4 shadow-lg">
-          <div className="flex items-start gap-3 rounded-xl bg-red-50 p-3">
-            <TriangleAlert className="h-5 w-5 flex-shrink-0 text-red-600" />
+          {loading ? (
+            <p className="font-instrument text-sm text-black/40">Cargando...</p>
+          ) : situationCounts.length > 0 ? (
+            <div className="flex items-start gap-3 rounded-xl bg-red-50 p-3">
+              <TriangleAlert className="h-5 w-5 flex-shrink-0 text-red-600" />
+              <div>
+                <p className="font-instrument text-sm font-semibold text-red-700">
+                  Estado de Precaución
+                </p>
+                <p className="mt-0.5 font-instrument text-xs text-red-700/80">
+                  Se han registrado reportes recientes en esta área.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start gap-3 rounded-xl bg-green-50 p-3">
+              <ShieldCheck className="h-5 w-5 flex-shrink-0 text-green-600" />
+              <div>
+                <p className="font-instrument text-sm font-semibold text-green-700">
+                  Sin reportes recientes
+                </p>
+                <p className="mt-0.5 font-instrument text-xs text-green-700/80">
+                  No hay reportes registrados en los últimos 7 días.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {situationCounts.length > 0 && (
             <div>
-              <p className="font-instrument text-sm font-semibold text-red-700">
-                Estado de Precaución
+              <p className="font-instrument text-sm font-semibold text-black">
+                Reportes registrados
               </p>
-              <p className="mt-0.5 font-instrument text-xs text-red-700/80">
-                Se han registrado reportes recientes en esta área.
-              </p>
-            </div>
-          </div>
+              <p className="font-instrument text-xs text-black/50">Últimos 7 días</p>
 
-          <div>
-            <p className="font-instrument text-sm font-semibold text-black">
-              Reportes registrados
-            </p>
-            <p className="font-instrument text-xs text-black/50">Últimos 7 días</p>
-
-            <div className="mt-3 flex flex-col gap-2">
-              {REPORT_TYPES.map((report) => (
-                <div key={report.label} className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 font-instrument text-sm text-black">
-                    <report.icon className="h-4 w-4" style={{ color: report.color }} />
-                    {report.label}
-                  </span>
-                  <span className="font-instrument text-sm font-semibold text-black">
-                    {report.count}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="font-instrument text-sm font-semibold text-black">
-              Horarios con más reportes
-            </p>
-            <p className="font-instrument text-xs text-black/50">Basado en reportes recientes</p>
-
-            <div className="mt-3 flex items-end gap-1.5">
-              {HOURLY_REPORTS.map((h) => (
-                <div key={h.hour} className="flex flex-1 flex-col items-center gap-1">
+              <div className="mt-3 flex flex-col gap-2">
+                {situationCounts.map((report) => (
                   <div
-                    className={`w-full rounded-t transition-all duration-300 ${
-                      PEAK_HOURS.includes(h.hour) ? 'bg-brand' : 'bg-divider'
-                    }`}
-                    style={{ height: `${(h.value / maxValue) * 48}px` }}
-                  />
-                  <span className="font-instrument text-[10px] text-black/40">{h.hour}</span>
-                </div>
-              ))}
+                    key={`${report.category}-${report.situation}`}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-2 font-instrument text-sm text-black">
+                      <span
+                        className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                        style={{ backgroundColor: report.color }}
+                      />
+                      {report.situation}
+                    </span>
+                    <span className="font-instrument text-sm font-semibold text-black">
+                      {report.count}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="mt-2 text-center font-instrument text-xs font-medium text-brand">
-              18:00 – 22:00
-            </p>
-          </div>
+          )}
+
+          {situationCounts.length > 0 && (
+            <div>
+              <p className="font-instrument text-sm font-semibold text-black">
+                Horarios con más reportes
+              </p>
+              <p className="font-instrument text-xs text-black/50">Basado en reportes recientes</p>
+
+              <div className="mt-3 flex items-end gap-1.5">
+                {hourlyCounts.map((h) => (
+                  <div key={h.hour} className="flex flex-1 flex-col items-center gap-1">
+                    <div
+                      className={`w-full rounded-t transition-all duration-300 ${
+                        h.value === peakHour.value && h.value > 0 ? 'bg-brand' : 'bg-divider'
+                      }`}
+                      style={{ height: `${(h.value / maxHourly) * 48}px` }}
+                    />
+                    <span className="font-instrument text-[10px] text-black/40">{h.hour}</span>
+                  </div>
+                ))}
+              </div>
+              {peakHour.value > 0 && (
+                <p className="mt-2 text-center font-instrument text-xs font-medium text-brand">
+                  {peakHour.hour}:00 – {(Number(peakHour.hour) + 2) % 24}:00
+                </p>
+              )}
+            </div>
+          )}
 
           <button
             type="button"
