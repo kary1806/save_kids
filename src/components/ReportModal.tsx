@@ -50,7 +50,7 @@ export default function ReportModal({
   const geocodingLibrary = useMapsLibrary('geocoding')
   const [when, setWhen] = useState(() => new Date().toISOString().slice(0, 16))
   const [description, setDescription] = useState('')
-  const [confirmed, setConfirmed] = useState(false)
+  const [confirmed, setConfirmed] = useState(true)
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
