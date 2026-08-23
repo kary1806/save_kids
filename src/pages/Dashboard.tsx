@@ -11,6 +11,7 @@ import {
   Settings,
   HelpCircle,
   Bell,
+  Clock,
   Menu,
   X,
   LogOut,
@@ -58,6 +59,7 @@ function RecenterMap({ target }: { target: { lat: number; lng: number } | null }
 const NAV_ITEMS = [
   { label: 'Inicio', icon: Home, color: '#000000' },
   { label: 'Reportar Situación', icon: Megaphone, color: '#f97316' },
+  { label: 'Consultar horario', icon: Clock, color: '#235ee0' },
   { label: 'Rutas', icon: Route, color: '#16a34a' },
   { label: 'Tu perfil', icon: User, color: '#000000' },
 ]
@@ -290,6 +292,7 @@ export default function Dashboard() {
     setActiveNav(label)
     if (label === 'Reportar Situación') setReportModalOpen(true)
     if (label === 'Tu perfil') setProfileModalOpen(true)
+    if (label === 'Consultar horario') setTimeModalOpen(true)
   }
 
   return (
