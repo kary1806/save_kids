@@ -87,7 +87,7 @@ function Sidebar({
           </span>
         </div>
         {onClose && (
-          <button type="button" onClick={onClose} aria-label="Cerrar menú" className="md:hidden">
+          <button type="button" onClick={onClose} aria-label="Cerrar menú" className="lg:hidden">
             <X className="h-5 w-5 text-black/60 dark:text-white/60" />
           </button>
         )}
@@ -295,7 +295,7 @@ export default function Dashboard() {
   return (
     <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
     <div className="flex h-dvh w-full overflow-hidden bg-white dark:bg-gray-950">
-      <aside className="hidden flex-shrink-0 border-r border-hairline md:flex">
+      <aside className="hidden flex-shrink-0 border-r border-hairline lg:flex">
         <Sidebar
           activeNav={activeNav}
           onNavClick={handleNavClick}
@@ -306,7 +306,7 @@ export default function Dashboard() {
       </aside>
 
       {menuOpen && (
-        <div className="fixed inset-0 z-[2000] flex md:hidden">
+        <div className="fixed inset-0 z-[2000] flex lg:hidden">
           <div className="border-r border-hairline bg-white shadow-xl">
             <Sidebar
               activeNav={activeNav}
@@ -341,7 +341,7 @@ export default function Dashboard() {
             type="button"
             aria-label="Abrir menú"
             onClick={() => setMenuOpen(true)}
-            className="md:hidden"
+            className="lg:hidden"
           >
             <Menu className="h-6 w-6 text-black dark:text-white" />
           </button>
