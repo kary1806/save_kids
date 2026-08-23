@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow, useMap } from '@vis.gl/react-google-maps'
 import {
   ShieldCheck,
+  Shield,
   Home,
-  TriangleAlert,
+  Megaphone,
   Route,
   User,
   Settings,
   HelpCircle,
-  Search,
   Bell,
   Menu,
   X,
@@ -29,7 +29,7 @@ import ProfileModal from '../components/ProfileModal'
 import SettingsModal from '../components/SettingsModal'
 import HelpModal from '../components/HelpModal'
 import MyReportsModal from '../components/MyReportsModal'
-import InfoCardIllustration from '../components/InfoCardIllustration'
+import infoCardIllustration from '../assets/info-card-illustration.png'
 
 type MapCategory = { key: string; label: string; color: string }
 type ReportMarker = {
@@ -57,7 +57,7 @@ function RecenterMap({ target }: { target: { lat: number; lng: number } | null }
 
 const NAV_ITEMS = [
   { label: 'Inicio', icon: Home, color: '#000000' },
-  { label: 'Reportar Situación', icon: TriangleAlert, color: '#f97316' },
+  { label: 'Reportar Situación', icon: Megaphone, color: '#f97316' },
   { label: 'Rutas', icon: Route, color: '#16a34a' },
   { label: 'Tu perfil', icon: User, color: '#000000' },
 ]
@@ -145,7 +145,7 @@ function Sidebar({
       </div>
 
       <div className="mt-auto overflow-hidden rounded-xl shadow-md">
-        <InfoCardIllustration />
+        <img src={infoCardIllustration} alt="" className="h-auto w-full" />
         <div className="bg-white p-4 dark:bg-gray-900">
           <p className="font-instrument text-sm font-bold leading-tight text-brand">
             Tu información hace la diferencia
@@ -164,6 +164,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
   const [category, setCategory] = useState('todo')
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
   const [mapCategories, setMapCategories] = useState<MapCategory[]>([])
   const [menuOpen, setMenuOpen] = useState(false)
   const [timeModalOpen, setTimeModalOpen] = useState(false)
@@ -331,8 +332,7 @@ export default function Dashboard() {
             <Menu className="h-6 w-6 text-black dark:text-white" />
           </button>
 
-          <div className="flex min-w-[140px] flex-1 items-center gap-2 rounded-full border border-hairline px-4 py-2 dark:border-white/20">
-            <Search className="h-4 w-4 flex-shrink-0 text-black/40 dark:text-white/40" />
+          <div className="flex min-w-[140px] flex-1 items-center gap-2 rounded-full border border-hairline px-4 py-1.5 dark:border-white/20">
             <PlaceAutocompleteInput
               placeholder={locationStatus === 'granted' ? 'Tu ubicación actual' : '¿A dónde vas?'}
               className="w-full min-w-0 font-instrument text-sm text-black outline-none"
@@ -376,31 +376,41 @@ export default function Dashboard() {
           </button>
         </header>
 
-        <div className="flex gap-2 overflow-x-auto px-4 py-3 sm:px-6">
-          {filterOptions.map((cat) => (
-            <button
-              key={cat.key}
-              type="button"
-              onClick={() => setCategory(cat.key)}
-              className="flex flex-shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 font-instrument text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-105 active:scale-95"
-              style={
-                category === cat.key
-                  ? { backgroundColor: cat.color, borderColor: cat.color, color: '#fff' }
-                  : { borderColor: cat.color, color: theme === 'dark' ? '#fff' : '#000' }
-              }
-            >
-              {category !== cat.key && (
-                <span
-                  className="h-2 w-2 flex-shrink-0 rounded-full"
-                  style={{ backgroundColor: cat.color }}
-                />
-              )}
-              {cat.label}
-            </button>
-          ))}
+        <div className="flex gap-3 overflow-x-auto px-4 py-3 sm:px-6">
+          {filterOptions.map((cat) => {
+            const isActive = category === cat.key
+            const isHighlighted = isActive || hoveredCategory === cat.key
+            const neutralBorder = theme === 'dark' ? 'rgba(255,255,255,0.15)' : '#e5e4e7'
+            const neutralText = theme === 'dark' ? '#fff' : '#000'
+            return (
+              <button
+                key={cat.key}
+                type="button"
+                onClick={() => setCategory(cat.key)}
+                onMouseEnter={() => setHoveredCategory(cat.key)}
+                onMouseLeave={() => setHoveredCategory(null)}
+                className="flex flex-shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 font-instrument text-sm transition-all duration-200 active:scale-95"
+                style={
+                  isActive
+                    ? { backgroundColor: cat.color, borderColor: cat.color, color: '#fff' }
+                    : isHighlighted
+                      ? { borderColor: cat.color, color: neutralText }
+                      : { borderColor: neutralBorder, color: neutralText }
+                }
+              >
+                {isHighlighted && (
+                  <span
+                    className="h-2 w-2 flex-shrink-0 rounded-full"
+                    style={{ backgroundColor: isActive ? '#fff' : cat.color }}
+                  />
+                )}
+                {cat.label}
+              </button>
+            )
+          })}
         </div>
 
-        <div className="relative flex-1">
+        <div className="relative mt-2 flex-1">
           <ZoneReportsPanel
             category={category}
             locationStatus={locationStatus}
@@ -452,15 +462,19 @@ export default function Dashboard() {
           </Map>
 
           <div className="absolute inset-x-4 bottom-4 z-[1000] flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl bg-white px-5 py-3 shadow-xl">
-            <p className="font-instrument text-xs font-semibold text-black">
+            <p className="flex items-center gap-1.5 font-instrument text-xs font-semibold text-black">
+              <Shield className="h-3.5 w-3.5 flex-shrink-0 text-brand" />
               Información del Mapa
             </p>
             {mapCategories.map((cat) => (
-              <div key={cat.key} className="flex items-center gap-2">
-                <span
-                  className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
-                  style={{ backgroundColor: cat.color }}
-                />
+              <div key={cat.key} className="flex items-center gap-1.5">
+                <svg viewBox="0 0 24 24" className="h-4 w-4 flex-shrink-0">
+                  <path
+                    d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
+                    fill={cat.color}
+                  />
+                  <circle cx="12" cy="10" r="3" fill="#ffffff" />
+                </svg>
                 <span className="font-instrument text-xs text-black/70">{cat.label}</span>
               </div>
             ))}

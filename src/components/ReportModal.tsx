@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, MapPin, Clock, Send, CloudCheck, ShieldCheck, Lock, Users, LocateFixed } from 'lucide-react'
+import { X, Clock, Send, CloudCheck, ShieldCheck, Lock, Users, LocateFixed } from 'lucide-react'
 import { useMapsLibrary } from '@vis.gl/react-google-maps'
 import { supabase } from '../lib/supabase'
 import PlaceAutocompleteInput from './PlaceAutocompleteInput'
@@ -295,7 +295,6 @@ export default function ReportModal({
               Seleccionar ubicación
             </span>
             <div className="flex items-center gap-2 rounded-lg border border-hairline px-3 py-2">
-              <MapPin className="h-4 w-4 flex-shrink-0 text-black/40" />
               <PlaceAutocompleteInput
                 placeholder="Ej. Av. Pedro de heredia"
                 className="w-full min-w-0 font-instrument text-sm text-black outline-none"

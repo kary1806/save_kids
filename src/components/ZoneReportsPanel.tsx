@@ -1,6 +1,43 @@
 import { useEffect, useState } from 'react'
-import { MapPin, ChevronDown, ChevronUp, TriangleAlert, ShieldCheck, LocateFixed } from 'lucide-react'
+import {
+  MapPin,
+  ChevronDown,
+  ChevronUp,
+  TriangleAlert,
+  ShieldCheck,
+  LocateFixed,
+  Siren,
+  ShieldAlert,
+  UserRoundSearch,
+  Lightbulb,
+  Car,
+  TrafficCone,
+  Construction,
+  Waves,
+  CloudRain,
+  Mountain,
+  UserRoundX,
+  CircleHelp,
+  type LucideIcon,
+} from 'lucide-react'
 import { supabase } from '../lib/supabase'
+
+const SITUATION_ICONS: Record<string, LucideIcon> = {
+  Robo: Siren,
+  Violencia: ShieldAlert,
+  'Persona Sospechosa': UserRoundSearch,
+  'Poca iluminación': Lightbulb,
+  Tráfico: Car,
+  'Cruce Peligroso': TrafficCone,
+  Accidente: TriangleAlert,
+  'Vía en mal estado': Construction,
+  Inundación: Waves,
+  'Lluvias intensas': CloudRain,
+  Deslizamiento: Mountain,
+  Acoso: UserRoundX,
+  'Alta circulación vehicular': Car,
+  Otro: CircleHelp,
+}
 
 type CategoryInfo = { key: string; label: string; color: string }
 type SituationInfo = { id: string; category_key: string; label: string }
@@ -185,23 +222,26 @@ export default function ZoneReportsPanel({
                   <p className="font-instrument text-xs text-black/50">Últimos 7 días</p>
 
                   <div className="mt-3 flex flex-col gap-2">
-                    {situationCounts.map((report) => (
-                      <div
-                        key={`${report.category}-${report.situation}`}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="flex items-center gap-2 font-instrument text-sm text-black">
-                          <span
-                            className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
-                            style={{ backgroundColor: report.color }}
-                          />
-                          {report.situation}
-                        </span>
-                        <span className="font-instrument text-sm font-semibold text-black">
-                          {report.count}
-                        </span>
-                      </div>
-                    ))}
+                    {situationCounts.map((report) => {
+                      const Icon = SITUATION_ICONS[report.situation] ?? CircleHelp
+                      return (
+                        <div
+                          key={`${report.category}-${report.situation}`}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="flex items-center gap-2 font-instrument text-sm text-black">
+                            <Icon
+                              className="h-4 w-4 flex-shrink-0"
+                              style={{ color: report.color }}
+                            />
+                            {report.situation}
+                          </span>
+                          <span className="font-instrument text-sm font-semibold text-black">
+                            {report.count}
+                          </span>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )}
