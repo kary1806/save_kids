@@ -429,6 +429,12 @@ export default function Dashboard() {
           >
             <RecenterMap target={searchedPlace ?? userLocation} />
 
+            {searchedPlace && (
+              <AdvancedMarker position={searchedPlace}>
+                <Pin background="#235ee0" borderColor="#ffffff" glyphColor="#ffffff" />
+              </AdvancedMarker>
+            )}
+
             {userLocation && (
               <AdvancedMarker position={userLocation}>
                 <div className="h-4 w-4 rounded-full border-[3px] border-white bg-blue-600 shadow-[0_0_0_4px_rgba(37,99,235,0.3)]" />
