@@ -43,6 +43,7 @@ export default function ConditionsModal({
   placeName,
   address,
   coords,
+  category,
   time,
   userInitial,
   onClose,
@@ -50,6 +51,7 @@ export default function ConditionsModal({
   placeName: string
   address: string
   coords: { lat: number; lng: number } | null
+  category: string
   time: TimeOfDay
   userInitial: string
   onClose: () => void
@@ -67,17 +69,19 @@ export default function ConditionsModal({
     setLoading(true)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
-    Promise.all([
-      supabase.from('report_categories').select('*'),
-      supabase
-        .from('reports')
-        .select('category, situation, occurred_at')
-        .gte('occurred_at', sevenDaysAgo)
-        .gte('latitude', coords.lat - NEARBY_DEGREES)
-        .lte('latitude', coords.lat + NEARBY_DEGREES)
-        .gte('longitude', coords.lng - NEARBY_DEGREES)
-        .lte('longitude', coords.lng + NEARBY_DEGREES),
-    ]).then(([categoriesRes, reportsRes]) => {
+    let reportsQuery = supabase
+      .from('reports')
+      .select('category, situation, occurred_at')
+      .gte('occurred_at', sevenDaysAgo)
+      .gte('latitude', coords.lat - NEARBY_DEGREES)
+      .lte('latitude', coords.lat + NEARBY_DEGREES)
+      .gte('longitude', coords.lng - NEARBY_DEGREES)
+      .lte('longitude', coords.lng + NEARBY_DEGREES)
+
+    if (category !== 'todo') reportsQuery = reportsQuery.eq('category', category)
+
+    Promise.all([supabase.from('report_categories').select('*'), reportsQuery]).then(
+      ([categoriesRes, reportsRes]) => {
       const categories = (categoriesRes.data ?? []) as CategoryInfo[]
       const reports = (reportsRes.data ?? []) as ReportRow[]
       const [start, end] = TIME_HOUR_RANGE[time]
@@ -105,7 +109,7 @@ export default function ConditionsModal({
 
       setLoading(false)
     })
-  }, [coords?.lat, coords?.lng, time])
+  }, [coords?.lat, coords?.lng, category, time])
 
   function formatLastUpdated(iso: string) {
     const diffMs = Date.now() - new Date(iso).getTime()

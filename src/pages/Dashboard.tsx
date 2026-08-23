@@ -547,6 +547,7 @@ export default function Dashboard() {
           placeName={selectedPlace.name}
           address={selectedPlace.address}
           coords={selectedCoords}
+          category={category}
           time={selectedTime}
           userInitial={initial}
           onClose={() => setSelectedTime(null)}
