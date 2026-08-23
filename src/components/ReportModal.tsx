@@ -1,6 +1,21 @@
 import { useState } from 'react'
-import { X, MapPin, Clock, Send } from 'lucide-react'
+import { X, MapPin, Clock, Send, CloudCheck, ShieldCheck, Lock, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+
+const CONFIRMATION_ITEMS = [
+  {
+    icon: ShieldCheck,
+    text: 'Tu información será revisada antes de ser utilizada como alerta general.',
+  },
+  {
+    icon: Lock,
+    text: 'No compartiremos públicamente tus datos personales.',
+  },
+  {
+    icon: Users,
+    text: 'Los reportes ayudan a construir información preventiva para la comunidad.',
+  },
+]
 
 const CATEGORIES = [
   {
@@ -96,24 +111,35 @@ export default function ReportModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="absolute right-4 top-4 text-black/40 transition-colors duration-200 hover:text-black"
+            className="absolute right-5 top-5 text-black transition-colors duration-200 hover:text-black/60"
           >
             <X className="h-5 w-5" />
           </button>
-          <p className="font-instrument text-2xl">✅</p>
-          <h2 className="mt-3 font-instrument text-xl font-semibold text-black">
-            Reporte enviado
-          </h2>
-          <p className="mt-2 font-instrument text-sm text-black/60">
-            Gracias por ayudar a que tu comunidad esté más informada.
+
+          <p className="font-instrument text-xs font-bold uppercase tracking-widest text-brand">
+            Confirmación del reporte
           </p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-6 w-full rounded-2xl bg-brand px-6 py-3 font-instrument font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.02] active:scale-95"
-          >
-            Listo
-          </button>
+
+          <CloudCheck className="mx-auto mt-6 h-16 w-16 text-green-500" strokeWidth={1.5} />
+
+          <h2 className="mt-4 font-instrument text-xl font-semibold text-black">
+            Reporte recibido
+          </h2>
+          <p className="mt-1 font-instrument text-sm text-black/60">
+            Gracias por contribuir con información preventiva
+          </p>
+
+          <div className="mt-6 flex flex-col gap-3 text-left">
+            {CONFIRMATION_ITEMS.map((item) => (
+              <div
+                key={item.text}
+                className="flex items-start gap-3 rounded-xl bg-green-100 p-3"
+              >
+                <item.icon className="h-5 w-5 flex-shrink-0 text-green-700" />
+                <p className="font-instrument text-sm text-green-900">{item.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     )
