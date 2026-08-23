@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-import { X, MapPin, Clock, Send, CloudCheck, ShieldCheck, Lock, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { X, MapPin, Clock, Send, CloudCheck, ShieldCheck, Lock, Users, LocateFixed } from 'lucide-react'
 import { useMapsLibrary } from '@vis.gl/react-google-maps'
 import { supabase } from '../lib/supabase'
+import PlaceAutocompleteInput from './PlaceAutocompleteInput'
 
 const CONFIRMATION_ITEMS = [
   {
@@ -24,9 +25,11 @@ type Selection = { categoryKey: string; label: string }
 
 export default function ReportModal({
   userId,
+  userLocation,
   onClose,
 }: {
   userId: string
+  userLocation: { lat: number; lng: number } | null
   onClose: () => void
 }) {
   const [categories, setCategories] = useState<Category[]>([])
@@ -36,8 +39,8 @@ export default function ReportModal({
   const [selections, setSelections] = useState<Selection[]>([])
   const [location, setLocation] = useState('')
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null)
-  const locationContainerRef = useRef<HTMLDivElement>(null)
-  const placesLibrary = useMapsLibrary('places')
+  const [locatingMe, setLocatingMe] = useState(false)
+  const geocodingLibrary = useMapsLibrary('geocoding')
   const [when, setWhen] = useState(() => new Date().toISOString().slice(0, 16))
   const [description, setDescription] = useState('')
   const [confirmed, setConfirmed] = useState(false)
@@ -56,59 +59,25 @@ export default function ReportModal({
     })
   }, [])
 
-  useEffect(() => {
-    if (!placesLibrary || !locationContainerRef.current) return
+  async function handleUseMyLocation() {
+    if (!userLocation) return
+    setLocatingMe(true)
 
-    const container = locationContainerRef.current
-    const PlaceAutocompleteElement = (
-      placesLibrary as unknown as {
-        PlaceAutocompleteElement: new (options: {
-          locationBias: { radius: number; center: { lat: number; lng: number } }
-        }) => HTMLElement
+    if (geocodingLibrary) {
+      const geocoder = new geocodingLibrary.Geocoder()
+      try {
+        const { results } = await geocoder.geocode({ location: userLocation })
+        setLocation(results[0]?.formatted_address ?? 'Mi ubicación actual')
+      } catch {
+        setLocation('Mi ubicación actual')
       }
-    ).PlaceAutocompleteElement
-
-    const autocompleteEl = new PlaceAutocompleteElement({
-      locationBias: { radius: 50000, center: { lat: 10.406, lng: -75.5144 } },
-    })
-    autocompleteEl.setAttribute(
-      'class',
-      'w-full min-w-0 font-instrument text-sm text-black outline-none',
-    )
-    ;(autocompleteEl as HTMLElement & { placeholder?: string }).setAttribute(
-      'placeholder',
-      'Ej. Av. Pedro de heredia',
-    )
-    container.appendChild(autocompleteEl)
-
-    async function handleSelect(event: Event) {
-      const placePrediction = (
-        event as unknown as {
-          placePrediction?: {
-            toPlace: () => { fetchFields: (opts: { fields: string[] }) => Promise<void> } & Record<
-              string,
-              unknown
-            >
-          }
-        }
-      ).placePrediction
-      if (!placePrediction) return
-
-      const place = placePrediction.toPlace()
-      await place.fetchFields({ fields: ['formattedAddress', 'displayName', 'location'] })
-
-      const placeLocation = place.location as { lat: () => number; lng: () => number } | undefined
-      setLocation((place.formattedAddress as string) ?? (place.displayName as string) ?? '')
-      setCoords(placeLocation ? { lat: placeLocation.lat(), lng: placeLocation.lng() } : null)
+    } else {
+      setLocation('Mi ubicación actual')
     }
 
-    autocompleteEl.addEventListener('gmp-select', handleSelect)
-
-    return () => {
-      autocompleteEl.removeEventListener('gmp-select', handleSelect)
-      container.removeChild(autocompleteEl)
-    }
-  }, [placesLibrary])
+    setCoords(userLocation)
+    setLocatingMe(false)
+  }
 
   const canSubmit = Boolean(selections.length > 0 && location && when && confirmed)
 
@@ -324,11 +293,27 @@ export default function ReportModal({
             </span>
             <div className="flex items-center gap-2 rounded-lg border border-hairline px-3 py-2">
               <MapPin className="h-4 w-4 flex-shrink-0 text-black/40" />
-              <div ref={locationContainerRef} className="w-full min-w-0" />
+              <PlaceAutocompleteInput
+                placeholder="Ej. Av. Pedro de heredia"
+                className="w-full min-w-0 font-instrument text-sm text-black outline-none"
+                onPlaceSelected={(place) => {
+                  setLocation(place.address)
+                  setCoords({ lat: place.lat, lng: place.lng })
+                }}
+              />
             </div>
-            {location && (
-              <p className="font-instrument text-xs text-brand">📍 {location}</p>
+            {userLocation && (
+              <button
+                type="button"
+                onClick={handleUseMyLocation}
+                disabled={locatingMe}
+                className="flex items-center gap-1.5 self-start font-instrument text-xs font-medium text-brand transition-opacity duration-200 hover:opacity-70 disabled:opacity-50"
+              >
+                <LocateFixed className="h-3.5 w-3.5" />
+                {locatingMe ? 'Ubicando...' : 'Usar mi ubicación actual'}
+              </button>
             )}
+            {location && <p className="font-instrument text-xs text-brand">📍 {location}</p>}
           </label>
 
           <label className="flex flex-col gap-1.5">

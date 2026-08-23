@@ -22,6 +22,7 @@ import ZoneReportsPanel from '../components/ZoneReportsPanel'
 import TimeSelectorModal, { type TimeOfDay } from '../components/TimeSelectorModal'
 import ConditionsModal from '../components/ConditionsModal'
 import ReportModal from '../components/ReportModal'
+import PlaceAutocompleteInput from '../components/PlaceAutocompleteInput'
 import ProfileModal from '../components/ProfileModal'
 import SettingsModal from '../components/SettingsModal'
 import HelpModal from '../components/HelpModal'
@@ -157,6 +158,7 @@ export default function Dashboard() {
   const [helpModalOpen, setHelpModalOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('Inicio')
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [searchedPlace, setSearchedPlace] = useState<{ lat: number; lng: number } | null>(null)
   const [locationStatus, setLocationStatus] = useState<'pending' | 'granted' | 'denied' | 'blocked'>(
     'pending',
   )
@@ -312,10 +314,10 @@ export default function Dashboard() {
 
           <div className="flex min-w-[140px] flex-1 items-center gap-2 rounded-full border border-hairline px-4 py-2">
             <Search className="h-4 w-4 flex-shrink-0 text-black/40" />
-            <input
-              type="text"
+            <PlaceAutocompleteInput
               placeholder={locationStatus === 'granted' ? 'Tu ubicación actual' : '¿A dónde vas?'}
-              className="w-full min-w-0 font-instrument text-sm text-black outline-none placeholder:text-black/40"
+              className="w-full min-w-0 font-instrument text-sm text-black outline-none"
+              onPlaceSelected={(place) => setSearchedPlace({ lat: place.lat, lng: place.lng })}
             />
           </div>
 
@@ -372,9 +374,9 @@ export default function Dashboard() {
           <Map
             mapId="DEMO_MAP_ID"
             defaultCenter={CARTAGENA_CENTER}
-            center={userLocation ?? undefined}
+            center={searchedPlace ?? userLocation ?? undefined}
             defaultZoom={13}
-            zoom={userLocation ? 14 : undefined}
+            zoom={searchedPlace ?? userLocation ? 15 : undefined}
             disableDefaultUI={false}
             className="h-full w-full"
             onClick={() => setSelectedMarker(null)}
@@ -454,7 +456,11 @@ export default function Dashboard() {
       )}
 
       {reportModalOpen && (
-        <ReportModal userId={session.user.id} onClose={() => setReportModalOpen(false)} />
+        <ReportModal
+          userId={session.user.id}
+          userLocation={userLocation}
+          onClose={() => setReportModalOpen(false)}
+        />
       )}
 
       {profileModalOpen && (
