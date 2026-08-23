@@ -74,14 +74,24 @@ function riskIcon(risk: RiskLevel) {
 }
 
 const NAV_ITEMS = [
-  { label: 'Inicio', icon: Home, color: '#000000', active: true },
-  { label: 'Mapa', icon: MapIcon, color: '#2563eb', active: false },
-  { label: 'Reportar Situación', icon: TriangleAlert, color: '#f97316', active: false },
-  { label: 'Rutas', icon: Route, color: '#16a34a', active: false },
-  { label: 'Tú zona', icon: MapPin, color: '#000000', active: false },
+  { label: 'Inicio', icon: Home, color: '#000000' },
+  { label: 'Mapa', icon: MapIcon, color: '#2563eb' },
+  { label: 'Reportar Situación', icon: TriangleAlert, color: '#f97316' },
+  { label: 'Rutas', icon: Route, color: '#16a34a' },
+  { label: 'Tú zona', icon: MapPin, color: '#000000' },
 ]
 
-function Sidebar({ onClose, onSignOut }: { onClose?: () => void; onSignOut: () => void }) {
+function Sidebar({
+  activeNav,
+  onNavClick,
+  onClose,
+  onSignOut,
+}: {
+  activeNav: string
+  onNavClick: (label: string) => void
+  onClose?: () => void
+  onSignOut: () => void
+}) {
   return (
     <div className="flex h-full w-64 flex-col px-4 py-6">
       <div className="flex items-center justify-between px-2">
@@ -99,21 +109,25 @@ function Sidebar({ onClose, onSignOut }: { onClose?: () => void; onSignOut: () =
       </div>
 
       <nav className="mt-8 flex flex-col gap-1">
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.label}
-            type="button"
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm transition-colors duration-200 ${
-              item.active ? 'bg-brand text-white' : 'text-black hover:bg-brand/5'
-            }`}
-          >
-            <item.icon
-              className="h-5 w-5 flex-shrink-0"
-              style={{ color: item.active ? '#ffffff' : item.color }}
-            />
-            {item.label}
-          </button>
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const isActive = activeNav === item.label
+          return (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => onNavClick(item.label)}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm transition-colors duration-200 ${
+                isActive ? 'bg-brand text-white' : 'text-black hover:bg-brand/5'
+              }`}
+            >
+              <item.icon
+                className="h-5 w-5 flex-shrink-0"
+                style={{ color: isActive ? '#ffffff' : item.color }}
+              />
+              {item.label}
+            </button>
+          )
+        })}
       </nav>
 
       <div className="mt-6 flex flex-col gap-1 border-t border-hairline pt-6">
@@ -166,6 +180,7 @@ export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [timeModalOpen, setTimeModalOpen] = useState(false)
   const [selectedTime, setSelectedTime] = useState<TimeOfDay | null>(null)
+  const [activeNav, setActiveNav] = useState('Inicio')
 
   const selectedPlace = {
     name: 'Centro Comercial Caribe Plaza',
@@ -196,13 +211,21 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white">
       <aside className="hidden flex-shrink-0 border-r border-hairline md:flex">
-        <Sidebar onSignOut={handleSignOut} />
+        <Sidebar activeNav={activeNav} onNavClick={setActiveNav} onSignOut={handleSignOut} />
       </aside>
 
       {menuOpen && (
         <div className="fixed inset-0 z-[2000] flex md:hidden">
           <div className="border-r border-hairline bg-white shadow-xl">
-            <Sidebar onClose={() => setMenuOpen(false)} onSignOut={handleSignOut} />
+            <Sidebar
+              activeNav={activeNav}
+              onNavClick={(label) => {
+                setActiveNav(label)
+                setMenuOpen(false)
+              }}
+              onClose={() => setMenuOpen(false)}
+              onSignOut={handleSignOut}
+            />
           </div>
           <button
             type="button"
