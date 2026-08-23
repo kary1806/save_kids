@@ -13,7 +13,6 @@ import {
   Bell,
   Menu,
   X,
-  Users,
   LogOut,
   Moon,
   Sun,
@@ -30,6 +29,7 @@ import ProfileModal from '../components/ProfileModal'
 import SettingsModal from '../components/SettingsModal'
 import HelpModal from '../components/HelpModal'
 import MyReportsModal from '../components/MyReportsModal'
+import InfoCardIllustration from '../components/InfoCardIllustration'
 
 type MapCategory = { key: string; label: string; color: string }
 type ReportMarker = {
@@ -144,13 +144,10 @@ function Sidebar({
         </button>
       </div>
 
-      <div className="mt-auto overflow-hidden rounded-xl border border-hairline dark:border-white/10">
-        <div className="flex items-center justify-center gap-3 bg-brand/10 py-6">
-          <Users className="h-7 w-7 text-brand" />
-          <ShieldCheck className="h-9 w-9 text-brand" />
-        </div>
+      <div className="mt-auto overflow-hidden rounded-xl shadow-md">
+        <InfoCardIllustration />
         <div className="bg-white p-4 dark:bg-gray-900">
-          <p className="font-instrument text-sm font-semibold text-brand">
+          <p className="font-instrument text-sm font-bold leading-tight text-brand">
             Tu información hace la diferencia
           </p>
           <p className="mt-1 font-instrument text-xs text-black/60 dark:text-white/60">
@@ -454,21 +451,19 @@ export default function Dashboard() {
             )}
           </Map>
 
-          <div className="absolute bottom-4 left-4 z-[1000] rounded-lg border border-hairline bg-white px-4 py-3 shadow-lg">
-            <p className="mb-2 font-instrument text-xs font-semibold text-black">
+          <div className="absolute inset-x-4 bottom-4 z-[1000] flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl bg-white px-5 py-3 shadow-xl">
+            <p className="font-instrument text-xs font-semibold text-black">
               Información del Mapa
             </p>
-            <div className="flex flex-col gap-1">
-              {mapCategories.map((cat) => (
-                <div key={cat.key} className="flex items-center gap-2">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: cat.color }}
-                  />
-                  <span className="font-instrument text-xs text-black/70">{cat.label}</span>
-                </div>
-              ))}
-            </div>
+            {mapCategories.map((cat) => (
+              <div key={cat.key} className="flex items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: cat.color }}
+                />
+                <span className="font-instrument text-xs text-black/70">{cat.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
