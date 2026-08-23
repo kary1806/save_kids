@@ -196,10 +196,15 @@ export default function Dashboard() {
         name: searchedPlace.address.split(',')[0],
         address: searchedPlace.address,
       }
-    : {
-        name: 'Centro Comercial Caribe Plaza',
-        address: 'Cl. 29d #22-108, Pie de la Popa, Cartagena de Indias, Bolívar',
-      }
+    : userLocation
+      ? {
+          name: 'Tu ubicación actual',
+          address: 'Ubicación detectada automáticamente',
+        }
+      : {
+          name: 'Centro Comercial Caribe Plaza',
+          address: 'Cl. 29d #22-108, Pie de la Popa, Cartagena de Indias, Bolívar',
+        }
 
   useEffect(() => {
     if (!loading && !session) navigate('/login')
