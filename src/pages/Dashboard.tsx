@@ -157,7 +157,9 @@ export default function Dashboard() {
   const [helpModalOpen, setHelpModalOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('Inicio')
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [locationStatus, setLocationStatus] = useState<'pending' | 'granted' | 'denied'>('pending')
+  const [locationStatus, setLocationStatus] = useState<'pending' | 'granted' | 'denied' | 'blocked'>(
+    'pending',
+  )
   const [reportMarkers, setReportMarkers] = useState<ReportMarker[]>([])
   const [selectedMarker, setSelectedMarker] = useState<ReportMarker | null>(null)
 
@@ -170,7 +172,7 @@ export default function Dashboard() {
     if (!loading && !session) navigate('/login')
   }, [loading, session, navigate])
 
-  useEffect(() => {
+  function requestLocation() {
     if (!navigator.geolocation) {
       setLocationStatus('denied')
       return
@@ -180,8 +182,27 @@ export default function Dashboard() {
         setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude })
         setLocationStatus('granted')
       },
-      () => setLocationStatus('denied'),
+      (error) => setLocationStatus(error.code === error.PERMISSION_DENIED ? 'blocked' : 'denied'),
     )
+  }
+
+  useEffect(() => {
+    if (!navigator.permissions?.query) {
+      requestLocation()
+      return
+    }
+
+    navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+      if (result.state === 'denied') {
+        setLocationStatus('blocked')
+      } else {
+        requestLocation()
+      }
+      result.onchange = () => {
+        if (result.state === 'granted') requestLocation()
+        if (result.state === 'denied') setLocationStatus('blocked')
+      }
+    })
   }, [])
 
   useEffect(() => {

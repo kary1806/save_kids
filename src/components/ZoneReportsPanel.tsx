@@ -28,7 +28,7 @@ export default function ZoneReportsPanel({
   onConsultarHorario,
 }: {
   category: string
-  locationStatus: 'pending' | 'granted' | 'denied'
+  locationStatus: 'pending' | 'granted' | 'denied' | 'blocked'
   onConsultarHorario: () => void
 }) {
   const [open, setOpen] = useState(false)
@@ -122,6 +122,22 @@ export default function ZoneReportsPanel({
                 </p>
                 <p className="mt-0.5 font-instrument text-xs text-black/60">
                   Necesitamos tu ubicación para mostrarte la información de tu zona.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {locationStatus === 'blocked' && (
+            <div className="flex items-start gap-3 rounded-xl bg-amber-50 p-3">
+              <LocateFixed className="h-5 w-5 flex-shrink-0 text-amber-600" />
+              <div>
+                <p className="font-instrument text-sm font-semibold text-black">
+                  Tu ubicación está bloqueada
+                </p>
+                <p className="mt-0.5 font-instrument text-xs text-black/60">
+                  Tu navegador no volverá a preguntar solo. Actívala manualmente: toca el ícono de
+                  candado 🔒 junto a la dirección del sitio → Permisos del sitio (o Ubicación) →
+                  Permitir, y recarga la página.
                 </p>
               </div>
             </div>
