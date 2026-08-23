@@ -264,7 +264,7 @@ export default function Dashboard() {
   }, [category, reportsVersion])
 
   const filterOptions = useMemo(
-    () => [{ key: 'todo', label: 'Todo', color: '#000000' }, ...mapCategories],
+    () => [{ key: 'todo', label: 'Todo', color: '#235ee0' }, ...mapCategories],
     [mapCategories],
   )
 
@@ -338,7 +338,7 @@ export default function Dashboard() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex flex-wrap items-center gap-3 border-b border-hairline px-4 py-4 dark:border-white/10 sm:px-6">
+        <header className="flex flex-wrap items-center gap-3 px-4 py-4 sm:px-6">
           <button
             type="button"
             aria-label="Abrir menú"

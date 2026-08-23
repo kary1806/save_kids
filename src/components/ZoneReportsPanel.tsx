@@ -1,5 +1,13 @@
 import { useEffect, useState } from 'react'
-import { MapPin, ChevronDown, ChevronUp, TriangleAlert, ShieldCheck, LocateFixed } from 'lucide-react'
+import {
+  MapPin,
+  ChevronDown,
+  ChevronUp,
+  TriangleAlert,
+  ShieldCheck,
+  LocateFixed,
+  Clock,
+} from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { situationIcon } from '../lib/situationIcons'
 
@@ -156,10 +164,10 @@ export default function ZoneReportsPanel({
                 <div className="flex items-start gap-3 rounded-xl bg-red-50 p-3">
                   <TriangleAlert className="h-5 w-5 flex-shrink-0 text-red-600" />
                   <div>
-                    <p className="font-instrument text-sm font-semibold text-red-700">
+                    <p className="font-instrument text-sm font-semibold text-black">
                       Estado de Precaución
                     </p>
-                    <p className="mt-0.5 font-instrument text-xs text-red-700/80">
+                    <p className="mt-0.5 font-instrument text-xs text-black/70">
                       Se han registrado reportes recientes en esta área.
                     </p>
                   </div>
@@ -185,22 +193,34 @@ export default function ZoneReportsPanel({
                   </p>
                   <p className="font-instrument text-xs text-black/50">Últimos 7 días</p>
 
-                  <div className="mt-3 flex flex-col gap-2">
+                  <div className="mt-3 flex flex-col gap-4">
                     {situationCounts.map((report) => {
                       const Icon = situationIcon(report.situation)
+                      const maxCount = situationCounts[0]?.count || 1
+                      const pct = Math.max(6, Math.round((report.count / maxCount) * 100))
                       return (
                         <div
                           key={`${report.category}-${report.situation}`}
-                          className="flex items-center justify-between"
+                          className="flex items-center gap-3"
                         >
-                          <span className="flex items-center gap-2 font-instrument text-sm text-black">
-                            <Icon
-                              className="h-4 w-4 flex-shrink-0"
-                              style={{ color: report.color }}
-                            />
-                            {report.situation}
+                          <span
+                            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
+                            style={{ backgroundColor: `${report.color}20` }}
+                          >
+                            <Icon className="h-4 w-4" style={{ color: report.color }} />
                           </span>
-                          <span className="font-instrument text-sm font-semibold text-black">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-instrument text-sm text-black">
+                              {report.situation}
+                            </p>
+                            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-divider">
+                              <div
+                                className="h-full rounded-full transition-all duration-300"
+                                style={{ width: `${pct}%`, backgroundColor: report.color }}
+                              />
+                            </div>
+                          </div>
+                          <span className="flex-shrink-0 font-instrument text-sm font-semibold text-black">
                             {report.count}
                           </span>
                         </div>
@@ -212,7 +232,8 @@ export default function ZoneReportsPanel({
 
               {situationCounts.length > 0 && (
                 <div>
-                  <p className="font-instrument text-sm font-semibold text-black">
+                  <p className="flex items-center gap-1.5 font-instrument text-sm font-semibold text-black">
+                    <Clock className="h-4 w-4 flex-shrink-0 text-black/60" />
                     Horarios con más reportes
                   </p>
                   <p className="font-instrument text-xs text-black/50">
