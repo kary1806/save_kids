@@ -45,7 +45,7 @@ export default function MyReportsPanel({ userId }: { userId: string }) {
       <div className="flex items-center gap-2">
         <Route className="h-5 w-5 text-brand" />
         <h2 className="font-instrument text-xl font-semibold text-black dark:text-white">
-          Mis reportes
+          Mis rutas
         </h2>
       </div>
       <p className="mt-1 font-instrument text-sm text-black/60 dark:text-white/60">
