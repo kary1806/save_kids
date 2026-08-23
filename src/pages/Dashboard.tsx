@@ -361,7 +361,9 @@ export default function Dashboard() {
         />
       )}
 
-      {reportModalOpen && <ReportModal onClose={() => setReportModalOpen(false)} />}
+      {reportModalOpen && (
+        <ReportModal userId={session.user.id} onClose={() => setReportModalOpen(false)} />
+      )}
     </div>
   )
 }

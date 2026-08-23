@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { X, MapPin, Clock, Send } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 const CATEGORIES = [
   {
@@ -34,17 +35,25 @@ const CATEGORIES = [
   },
 ] as const
 
-export default function ReportModal({ onClose }: { onClose: () => void }) {
+export default function ReportModal({
+  userId,
+  onClose,
+}: {
+  userId: string
+  onClose: () => void
+}) {
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]['key'] | null>(null)
   const [subItem, setSubItem] = useState<string | null>(null)
   const [location, setLocation] = useState('')
-  const [when, setWhen] = useState('')
+  const [when, setWhen] = useState(() => new Date().toISOString().slice(0, 16))
   const [description, setDescription] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const activeCategory = CATEGORIES.find((c) => c.key === category)
-  const canSubmit = Boolean(category && subItem && location && confirmed)
+  const canSubmit = Boolean(category && subItem && location && when && confirmed)
 
   function handleCategoryClick(key: (typeof CATEGORIES)[number]['key']) {
     if (category === key) {
@@ -55,8 +64,27 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
     setSubItem(null)
   }
 
-  function handleSubmit() {
-    if (!canSubmit) return
+  async function handleSubmit() {
+    if (!canSubmit || !category || !subItem) return
+    setSubmitting(true)
+    setError(null)
+
+    const { error: insertError } = await supabase.from('reports').insert({
+      user_id: userId,
+      category,
+      situation: subItem,
+      location,
+      occurred_at: new Date(when).toISOString(),
+      description: description || null,
+    })
+
+    setSubmitting(false)
+
+    if (insertError) {
+      setError(insertError.message)
+      return
+    }
+
     setSubmitted(true)
   }
 
@@ -230,13 +258,15 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!canSubmit}
+            disabled={!canSubmit || submitting}
             className="flex flex-shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand px-6 py-2.5 font-instrument font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
           >
-            Enviar reporte
+            {submitting ? 'Enviando...' : 'Enviar reporte'}
             <Send className="h-4 w-4" />
           </button>
         </div>
+
+        {error && <p className="mt-3 font-instrument text-sm text-red-600">{error}</p>}
       </div>
     </div>
   )
