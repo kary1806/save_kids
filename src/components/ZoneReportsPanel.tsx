@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { MapPin, ChevronDown, ChevronUp, TriangleAlert, ShieldCheck } from 'lucide-react'
+import { MapPin, ChevronDown, ChevronUp, TriangleAlert, ShieldCheck, LocateFixed } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type CategoryInfo = { key: string; label: string; color: string }
@@ -24,9 +24,11 @@ function bucketHour(isoDate: string) {
 
 export default function ZoneReportsPanel({
   category,
+  locationStatus,
   onConsultarHorario,
 }: {
   category: string
+  locationStatus: 'pending' | 'granted' | 'denied'
   onConsultarHorario: () => void
 }) {
   const [open, setOpen] = useState(false)
@@ -46,6 +48,8 @@ export default function ZoneReportsPanel({
   }, [])
 
   useEffect(() => {
+    if (locationStatus !== 'granted') return
+
     setLoading(true)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
     let query = supabase
@@ -59,7 +63,7 @@ export default function ZoneReportsPanel({
       setReports(data ?? [])
       setLoading(false)
     })
-  }, [category])
+  }, [category, locationStatus])
 
   const situationCounts: SituationCount[] = Object.values(
     reports.reduce<Record<string, SituationCount>>((acc, r) => {
@@ -105,89 +109,115 @@ export default function ZoneReportsPanel({
 
       {open && (
         <div className="animate-fade-up mt-2 flex flex-col gap-4 rounded-2xl border border-hairline bg-white p-4 shadow-lg">
-          {loading ? (
+          {locationStatus === 'pending' && (
+            <p className="font-instrument text-sm text-black/40">Solicitando ubicación...</p>
+          )}
+
+          {locationStatus === 'denied' && (
+            <div className="flex items-start gap-3 rounded-xl bg-brand/5 p-3">
+              <LocateFixed className="h-5 w-5 flex-shrink-0 text-brand" />
+              <div>
+                <p className="font-instrument text-sm font-semibold text-black">
+                  Activa tu ubicación
+                </p>
+                <p className="mt-0.5 font-instrument text-xs text-black/60">
+                  Necesitamos tu ubicación para mostrarte la información de tu zona.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {locationStatus === 'granted' && loading && (
             <p className="font-instrument text-sm text-black/40">Cargando...</p>
-          ) : situationCounts.length > 0 ? (
-            <div className="flex items-start gap-3 rounded-xl bg-red-50 p-3">
-              <TriangleAlert className="h-5 w-5 flex-shrink-0 text-red-600" />
-              <div>
-                <p className="font-instrument text-sm font-semibold text-red-700">
-                  Estado de Precaución
-                </p>
-                <p className="mt-0.5 font-instrument text-xs text-red-700/80">
-                  Se han registrado reportes recientes en esta área.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-start gap-3 rounded-xl bg-green-50 p-3">
-              <ShieldCheck className="h-5 w-5 flex-shrink-0 text-green-600" />
-              <div>
-                <p className="font-instrument text-sm font-semibold text-green-700">
-                  Sin reportes recientes
-                </p>
-                <p className="mt-0.5 font-instrument text-xs text-green-700/80">
-                  No hay reportes registrados en los últimos 7 días.
-                </p>
-              </div>
-            </div>
           )}
 
-          {situationCounts.length > 0 && (
-            <div>
-              <p className="font-instrument text-sm font-semibold text-black">
-                Reportes registrados
-              </p>
-              <p className="font-instrument text-xs text-black/50">Últimos 7 días</p>
-
-              <div className="mt-3 flex flex-col gap-2">
-                {situationCounts.map((report) => (
-                  <div
-                    key={`${report.category}-${report.situation}`}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="flex items-center gap-2 font-instrument text-sm text-black">
-                      <span
-                        className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
-                        style={{ backgroundColor: report.color }}
-                      />
-                      {report.situation}
-                    </span>
-                    <span className="font-instrument text-sm font-semibold text-black">
-                      {report.count}
-                    </span>
+          {locationStatus === 'granted' && !loading && (
+            <>
+              {situationCounts.length > 0 ? (
+                <div className="flex items-start gap-3 rounded-xl bg-red-50 p-3">
+                  <TriangleAlert className="h-5 w-5 flex-shrink-0 text-red-600" />
+                  <div>
+                    <p className="font-instrument text-sm font-semibold text-red-700">
+                      Estado de Precaución
+                    </p>
+                    <p className="mt-0.5 font-instrument text-xs text-red-700/80">
+                      Se han registrado reportes recientes en esta área.
+                    </p>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {situationCounts.length > 0 && (
-            <div>
-              <p className="font-instrument text-sm font-semibold text-black">
-                Horarios con más reportes
-              </p>
-              <p className="font-instrument text-xs text-black/50">Basado en reportes recientes</p>
-
-              <div className="mt-3 flex items-end gap-1.5">
-                {hourlyCounts.map((h) => (
-                  <div key={h.hour} className="flex flex-1 flex-col items-center gap-1">
-                    <div
-                      className={`w-full rounded-t transition-all duration-300 ${
-                        h.value === peakHour.value && h.value > 0 ? 'bg-brand' : 'bg-divider'
-                      }`}
-                      style={{ height: `${(h.value / maxHourly) * 48}px` }}
-                    />
-                    <span className="font-instrument text-[10px] text-black/40">{h.hour}</span>
+                </div>
+              ) : (
+                <div className="flex items-start gap-3 rounded-xl bg-green-50 p-3">
+                  <ShieldCheck className="h-5 w-5 flex-shrink-0 text-green-600" />
+                  <div>
+                    <p className="font-instrument text-sm font-semibold text-green-700">
+                      Sin reportes recientes
+                    </p>
+                    <p className="mt-0.5 font-instrument text-xs text-green-700/80">
+                      No hay reportes registrados en los últimos 7 días.
+                    </p>
                   </div>
-                ))}
-              </div>
-              {peakHour.value > 0 && (
-                <p className="mt-2 text-center font-instrument text-xs font-medium text-brand">
-                  {peakHour.hour}:00 – {(Number(peakHour.hour) + 2) % 24}:00
-                </p>
+                </div>
               )}
-            </div>
+
+              {situationCounts.length > 0 && (
+                <div>
+                  <p className="font-instrument text-sm font-semibold text-black">
+                    Reportes registrados
+                  </p>
+                  <p className="font-instrument text-xs text-black/50">Últimos 7 días</p>
+
+                  <div className="mt-3 flex flex-col gap-2">
+                    {situationCounts.map((report) => (
+                      <div
+                        key={`${report.category}-${report.situation}`}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="flex items-center gap-2 font-instrument text-sm text-black">
+                          <span
+                            className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                            style={{ backgroundColor: report.color }}
+                          />
+                          {report.situation}
+                        </span>
+                        <span className="font-instrument text-sm font-semibold text-black">
+                          {report.count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {situationCounts.length > 0 && (
+                <div>
+                  <p className="font-instrument text-sm font-semibold text-black">
+                    Horarios con más reportes
+                  </p>
+                  <p className="font-instrument text-xs text-black/50">
+                    Basado en reportes recientes
+                  </p>
+
+                  <div className="mt-3 flex items-end gap-1.5">
+                    {hourlyCounts.map((h) => (
+                      <div key={h.hour} className="flex flex-1 flex-col items-center gap-1">
+                        <div
+                          className={`w-full rounded-t transition-all duration-300 ${
+                            h.value === peakHour.value && h.value > 0 ? 'bg-brand' : 'bg-divider'
+                          }`}
+                          style={{ height: `${(h.value / maxHourly) * 48}px` }}
+                        />
+                        <span className="font-instrument text-[10px] text-black/40">{h.hour}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {peakHour.value > 0 && (
+                    <p className="mt-2 text-center font-instrument text-xs font-medium text-brand">
+                      {peakHour.hour}:00 – {(Number(peakHour.hour) + 2) % 24}:00
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
           )}
 
           <button

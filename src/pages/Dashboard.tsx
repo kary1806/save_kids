@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {
@@ -51,6 +51,21 @@ function categoryIcon(color: string) {
     iconSize: [24, 24],
     iconAnchor: [12, 24],
   })
+}
+
+const userLocationIcon = L.divIcon({
+  className: '',
+  html: `<div style="width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid white;box-shadow:0 0 0 4px rgba(37,99,235,0.3)"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+})
+
+function RecenterMap({ location }: { location: { lat: number; lng: number } | null }) {
+  const map = useMap()
+  useEffect(() => {
+    if (location) map.setView([location.lat, location.lng], 14)
+  }, [location, map])
+  return null
 }
 
 const NAV_ITEMS = [
@@ -171,6 +186,8 @@ export default function Dashboard() {
   const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const [helpModalOpen, setHelpModalOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('Inicio')
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [locationStatus, setLocationStatus] = useState<'pending' | 'granted' | 'denied'>('pending')
 
   const selectedPlace = {
     name: 'Centro Comercial Caribe Plaza',
@@ -180,6 +197,20 @@ export default function Dashboard() {
   useEffect(() => {
     if (!loading && !session) navigate('/login')
   }, [loading, session, navigate])
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus('denied')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude })
+        setLocationStatus('granted')
+      },
+      () => setLocationStatus('denied'),
+    )
+  }, [])
 
   useEffect(() => {
     supabase
@@ -278,7 +309,7 @@ export default function Dashboard() {
             <Search className="h-4 w-4 flex-shrink-0 text-black/40" />
             <input
               type="text"
-              placeholder="¿A dónde vas?"
+              placeholder={locationStatus === 'granted' ? 'Tu ubicación actual' : '¿A dónde vas?'}
               className="w-full min-w-0 font-instrument text-sm text-black outline-none placeholder:text-black/40"
             />
           </div>
@@ -328,7 +359,11 @@ export default function Dashboard() {
         </div>
 
         <div className="relative flex-1">
-          <ZoneReportsPanel category={category} onConsultarHorario={() => setTimeModalOpen(true)} />
+          <ZoneReportsPanel
+            category={category}
+            locationStatus={locationStatus}
+            onConsultarHorario={() => setTimeModalOpen(true)}
+          />
           <MapContainer
             center={[10.406, -75.5144]}
             zoom={13}
@@ -339,6 +374,12 @@ export default function Dashboard() {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            <RecenterMap location={userLocation} />
+            {userLocation && (
+              <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
+                <Popup>Tu ubicación</Popup>
+              </Marker>
+            )}
             {visibleZones.map((zone) => (
               <Marker
                 key={zone.id}
