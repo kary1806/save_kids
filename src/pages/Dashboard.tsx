@@ -170,6 +170,8 @@ export default function Dashboard() {
   const [timeModalOpen, setTimeModalOpen] = useState(false)
   const [selectedTime, setSelectedTime] = useState<TimeOfDay | null>(null)
   const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [pickingLocation, setPickingLocation] = useState(false)
+  const [pickedLocation, setPickedLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [profileModalOpen, setProfileModalOpen] = useState(false)
   const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const [helpModalOpen, setHelpModalOpen] = useState(false)
@@ -445,13 +447,26 @@ export default function Dashboard() {
             defaultZoom={13}
             disableDefaultUI={false}
             className="h-full w-full"
-            onClick={() => setSelectedMarker(null)}
+            onClick={(e) => {
+              if (pickingLocation && e.latLng) {
+                setPickedLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+                setPickingLocation(false)
+                return
+              }
+              setSelectedMarker(null)
+            }}
           >
             <RecenterMap target={searchedPlace ?? userLocation} />
 
             {searchedPlace && (
               <AdvancedMarker position={searchedPlace}>
                 <Pin background="#235ee0" borderColor="#ffffff" glyphColor="#ffffff" />
+              </AdvancedMarker>
+            )}
+
+            {pickedLocation && reportModalOpen && (
+              <AdvancedMarker position={pickedLocation}>
+                <Pin background="#f97316" borderColor="#ffffff" glyphColor="#ffffff" />
               </AdvancedMarker>
             )}
 
@@ -539,12 +554,36 @@ export default function Dashboard() {
       )}
 
       {reportModalOpen && (
-        <ReportModal
-          userId={session.user.id}
-          userLocation={userLocation}
-          onReportCreated={() => setReportsVersion((v) => v + 1)}
-          onClose={() => setReportModalOpen(false)}
-        />
+        <div className={pickingLocation ? 'hidden' : ''}>
+          <ReportModal
+            userId={session.user.id}
+            userLocation={userLocation}
+            pickedLocation={pickedLocation}
+            onPickOnMap={() => setPickingLocation(true)}
+            onReportCreated={() => setReportsVersion((v) => v + 1)}
+            onClose={() => {
+              setReportModalOpen(false)
+              setPickedLocation(null)
+            }}
+          />
+        </div>
+      )}
+
+      {pickingLocation && (
+        <div className="fixed inset-x-0 top-4 z-[3000] flex justify-center px-4">
+          <div className="animate-fade-up flex items-center gap-3 rounded-full bg-white px-5 py-3 shadow-xl">
+            <span className="font-instrument text-sm text-black">
+              Toca el mapa para elegir la ubicación
+            </span>
+            <button
+              type="button"
+              onClick={() => setPickingLocation(false)}
+              className="font-instrument text-sm font-semibold text-brand hover:opacity-70"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
       )}
 
       {profileModalOpen && (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, Clock, Send, CloudCheck, ShieldCheck, Lock, Users, LocateFixed } from 'lucide-react'
+import { X, Clock, Send, CloudCheck, ShieldCheck, Lock, Users, LocateFixed, MapPinned } from 'lucide-react'
 import { useMapsLibrary } from '@vis.gl/react-google-maps'
 import { supabase } from '../lib/supabase'
 import PlaceAutocompleteInput from './PlaceAutocompleteInput'
@@ -26,11 +26,15 @@ type Selection = { categoryKey: string; label: string }
 export default function ReportModal({
   userId,
   userLocation,
+  pickedLocation,
+  onPickOnMap,
   onReportCreated,
   onClose,
 }: {
   userId: string
   userLocation: { lat: number; lng: number } | null
+  pickedLocation: { lat: number; lng: number } | null
+  onPickOnMap: () => void
   onReportCreated: () => void
   onClose: () => void
 }) {
@@ -62,25 +66,34 @@ export default function ReportModal({
     })
   }, [])
 
-  async function handleUseMyLocation() {
-    if (!userLocation) return
+  async function resolveLocation(point: { lat: number; lng: number }, fallbackLabel: string) {
     setLocatingMe(true)
 
     if (geocodingLibrary) {
       const geocoder = new geocodingLibrary.Geocoder()
       try {
-        const { results } = await geocoder.geocode({ location: userLocation })
-        setLocation(results[0]?.formatted_address ?? 'Mi ubicación actual')
+        const { results } = await geocoder.geocode({ location: point })
+        setLocation(results[0]?.formatted_address ?? fallbackLabel)
       } catch {
-        setLocation('Mi ubicación actual')
+        setLocation(fallbackLabel)
       }
     } else {
-      setLocation('Mi ubicación actual')
+      setLocation(fallbackLabel)
     }
 
-    setCoords(userLocation)
+    setCoords(point)
     setLocatingMe(false)
   }
+
+  function handleUseMyLocation() {
+    if (!userLocation) return
+    resolveLocation(userLocation, 'Mi ubicación actual')
+  }
+
+  useEffect(() => {
+    if (pickedLocation) resolveLocation(pickedLocation, 'Ubicación seleccionada en el mapa')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickedLocation?.lat, pickedLocation?.lng])
 
   const canSubmit = Boolean(selections.length > 0 && location && when && confirmed)
 
@@ -313,17 +326,28 @@ export default function ReportModal({
                 }}
               />
             </div>
-            {userLocation && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              {userLocation && (
+                <button
+                  type="button"
+                  onClick={handleUseMyLocation}
+                  disabled={locatingMe}
+                  className="flex items-center gap-1.5 self-start font-instrument text-xs font-medium text-brand transition-opacity duration-200 hover:opacity-70 disabled:opacity-50"
+                >
+                  <LocateFixed className="h-3.5 w-3.5" />
+                  {locatingMe ? 'Ubicando...' : 'Usar mi ubicación actual'}
+                </button>
+              )}
               <button
                 type="button"
-                onClick={handleUseMyLocation}
+                onClick={onPickOnMap}
                 disabled={locatingMe}
                 className="flex items-center gap-1.5 self-start font-instrument text-xs font-medium text-brand transition-opacity duration-200 hover:opacity-70 disabled:opacity-50"
               >
-                <LocateFixed className="h-3.5 w-3.5" />
-                {locatingMe ? 'Ubicando...' : 'Usar mi ubicación actual'}
+                <MapPinned className="h-3.5 w-3.5" />
+                Elegir en el mapa
               </button>
-            )}
+            </div>
             {location && <p className="font-instrument text-xs text-brand">📍 {location}</p>}
           </label>
 
