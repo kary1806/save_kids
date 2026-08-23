@@ -24,6 +24,7 @@ import { supabase } from '../lib/supabase'
 import ZoneReportsPanel from '../components/ZoneReportsPanel'
 import TimeSelectorModal, { type TimeOfDay } from '../components/TimeSelectorModal'
 import ConditionsModal from '../components/ConditionsModal'
+import ReportModal from '../components/ReportModal'
 
 const CATEGORIES = [
   { key: 'todo', label: 'Todo' },
@@ -180,6 +181,7 @@ export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [timeModalOpen, setTimeModalOpen] = useState(false)
   const [selectedTime, setSelectedTime] = useState<TimeOfDay | null>(null)
+  const [reportModalOpen, setReportModalOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('Inicio')
 
   const selectedPlace = {
@@ -211,6 +213,7 @@ export default function Dashboard() {
   function handleNavClick(label: string) {
     setActiveNav(label)
     if (label === 'Mapa') setTimeModalOpen(true)
+    if (label === 'Reportar Situación') setReportModalOpen(true)
   }
 
   return (
@@ -357,6 +360,8 @@ export default function Dashboard() {
           onClose={() => setSelectedTime(null)}
         />
       )}
+
+      {reportModalOpen && <ReportModal onClose={() => setReportModalOpen(false)} />}
     </div>
   )
 }
