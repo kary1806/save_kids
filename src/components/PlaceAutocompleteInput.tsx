@@ -30,15 +30,35 @@ export default function PlaceAutocompleteInput({
     const container = containerRef.current
     const PlaceAutocompleteElement = (
       placesLibrary as unknown as {
-        PlaceAutocompleteElement: new (options: {
+        PlaceAutocompleteElement?: new (options: {
           locationBias?: { radius: number; center: { lat: number; lng: number } }
         }) => HTMLElement
       }
     ).PlaceAutocompleteElement
 
-    const autocompleteEl = new PlaceAutocompleteElement(
-      biasCenter ? { locationBias: { radius: 50000, center: biasCenter } } : {},
-    )
+    if (typeof PlaceAutocompleteElement !== 'function') {
+      const fallbackInput = document.createElement('input')
+      fallbackInput.type = 'text'
+      fallbackInput.placeholder = placeholder
+      fallbackInput.className = className ?? 'w-full min-w-0'
+      fallbackInput.addEventListener('change', () => {
+        onPlaceSelected({ address: fallbackInput.value, lat: 0, lng: 0 })
+      })
+      container.appendChild(fallbackInput)
+      return () => {
+        container.removeChild(fallbackInput)
+      }
+    }
+
+    let autocompleteEl: HTMLElement
+    try {
+      autocompleteEl = new PlaceAutocompleteElement(
+        biasCenter ? { locationBias: { radius: 50000, center: biasCenter } } : {},
+      )
+    } catch (err) {
+      console.error('Failed to create PlaceAutocompleteElement:', err)
+      return
+    }
 
     autocompleteEl.setAttribute('class', className ?? 'w-full min-w-0')
     autocompleteEl.setAttribute('placeholder', placeholder)
