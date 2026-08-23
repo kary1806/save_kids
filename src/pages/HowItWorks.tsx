@@ -46,10 +46,10 @@ export default function HowItWorks() {
           <p className="animate-fade-up font-instrument text-sm font-bold tracking-widest text-brand">
             FÁCIL Y PREVENTIVO
           </p>
-          <h1 className="mt-2 animate-fade-up font-instrument text-4xl font-semibold text-black [animation-delay:80ms]">
+          <h1 className="mt-2 animate-fade-up font-instrument text-4xl font-semibold text-black dark:text-white [animation-delay:80ms]">
             ¿Cómo funciona Safe Kids?
           </h1>
-          <p className="mt-3 max-w-xl animate-fade-up font-instrument text-black/60 [animation-delay:140ms]">
+          <p className="mt-3 max-w-xl animate-fade-up font-instrument text-black/60 dark:text-white/70 [animation-delay:140ms]">
             Consulta información antes de desplazarte y aporta reportes que ayuden a la
             comunidad.
           </p>

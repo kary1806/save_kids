@@ -23,18 +23,18 @@ export default function Home() {
         <span className="animate-fade-up rounded-full bg-brand/10 px-4 py-1.5 font-instrument text-sm text-brand">
           🧑‍🤝‍🧑 Sesión iniciada
         </span>
-        <h1 className="animate-fade-up font-instrument text-3xl font-semibold text-black [animation-delay:100ms]">
+        <h1 className="animate-fade-up font-instrument text-3xl font-semibold text-black dark:text-white [animation-delay:100ms]">
           Hola, {firstName}! 👋
         </h1>
-        <p className="animate-fade-up font-instrument text-black/60 [animation-delay:150ms]">
-          Bienvenido a <span className="font-semibold text-black">Safe Kids</span>. Tu plataforma
+        <p className="animate-fade-up font-instrument text-black/60 dark:text-white/70 [animation-delay:150ms]">
+          Bienvenido a <span className="font-semibold text-black dark:text-white">Safe Kids</span>. Tu plataforma
           de orientación y desplazamientos seguros. Explora el carrusel de herramientas para
           planificar tu ruta al colegio o de regreso a casa.
         </p>
         <div className="mt-2 flex animate-fade-up flex-wrap justify-center gap-4 [animation-delay:200ms]">
           <Link
             to="/how-it-works"
-            className="rounded-2xl border border-hairline px-6 py-3 font-instrument font-semibold text-black shadow-sm transition-all duration-200 hover:scale-105 hover:border-brand hover:text-brand active:scale-95"
+            className="rounded-2xl border border-hairline px-6 py-3 font-instrument font-semibold text-black shadow-sm transition-all duration-200 hover:scale-105 hover:border-brand hover:text-brand dark:text-white active:scale-95"
           >
             Cómo funciona
           </Link>
