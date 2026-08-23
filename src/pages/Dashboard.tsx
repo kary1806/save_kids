@@ -175,7 +175,11 @@ export default function Dashboard() {
   const [helpModalOpen, setHelpModalOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('Inicio')
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [searchedPlace, setSearchedPlace] = useState<{ lat: number; lng: number } | null>(null)
+  const [searchedPlace, setSearchedPlace] = useState<{
+    lat: number
+    lng: number
+    address: string
+  } | null>(null)
   const [locationStatus, setLocationStatus] = useState<'pending' | 'granted' | 'denied' | 'blocked'>(
     'pending',
   )
@@ -183,10 +187,15 @@ export default function Dashboard() {
   const [selectedMarker, setSelectedMarker] = useState<ReportMarker | null>(null)
   const [reportsVersion, setReportsVersion] = useState(0)
 
-  const selectedPlace = {
-    name: 'Centro Comercial Caribe Plaza',
-    address: 'Cl. 29d #22-108, Pie de la Popa, Cartagena de Indias, Bolívar',
-  }
+  const selectedPlace = searchedPlace
+    ? {
+        name: searchedPlace.address.split(',')[0],
+        address: searchedPlace.address,
+      }
+    : {
+        name: 'Centro Comercial Caribe Plaza',
+        address: 'Cl. 29d #22-108, Pie de la Popa, Cartagena de Indias, Bolívar',
+      }
 
   useEffect(() => {
     if (!loading && !session) navigate('/login')
@@ -335,7 +344,9 @@ export default function Dashboard() {
               placeholder={locationStatus === 'granted' ? 'Tu ubicación actual' : '¿A dónde vas?'}
               className="w-full min-w-0 font-instrument text-sm text-black outline-none"
               biasCenter={userLocation}
-              onPlaceSelected={(place) => setSearchedPlace({ lat: place.lat, lng: place.lng })}
+              onPlaceSelected={(place) =>
+                setSearchedPlace({ lat: place.lat, lng: place.lng, address: place.address })
+              }
             />
           </div>
 
