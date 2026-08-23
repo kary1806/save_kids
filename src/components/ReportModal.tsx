@@ -173,7 +173,7 @@ export default function ReportModal({
 
   return (
     <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/40 px-4">
-      <div className="animate-fade-up relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl sm:p-8">
+      <div className="animate-fade-up relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl sm:p-8">
         <button
           type="button"
           onClick={onClose}
@@ -289,8 +289,8 @@ export default function ReportModal({
           </>
         )}
 
-        <div className="mt-5 grid grid-cols-1 gap-4 border-t border-hairline pt-5 sm:grid-cols-2">
-          <label className="flex flex-col gap-1.5">
+        <div className="mt-5 grid grid-cols-1 gap-4 border-t border-hairline pt-5 sm:grid-cols-5">
+          <label className="flex flex-col gap-1.5 sm:col-span-3">
             <span className="font-instrument text-xs font-medium text-black/60">
               Seleccionar ubicación
             </span>
@@ -319,7 +319,7 @@ export default function ReportModal({
             {location && <p className="font-instrument text-xs text-brand">📍 {location}</p>}
           </label>
 
-          <label className="flex flex-col gap-1.5">
+          <label className="flex flex-col gap-1.5 sm:col-span-2">
             <span className="font-instrument text-xs font-medium text-black/60">
               ¿Cuándo ocurrió?
             </span>
