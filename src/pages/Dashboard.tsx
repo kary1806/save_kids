@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow } from '@vis.gl/react-google-maps'
+import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow, useMap } from '@vis.gl/react-google-maps'
 import {
   ShieldCheck,
   Home,
@@ -42,6 +42,18 @@ type ReportMarker = {
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
 const CARTAGENA_CENTER = { lat: 10.406, lng: -75.5144 }
+
+function RecenterMap({ target }: { target: { lat: number; lng: number } | null }) {
+  const map = useMap()
+  useEffect(() => {
+    if (map && target) {
+      map.panTo(target)
+      map.setZoom(15)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, target?.lat, target?.lng])
+  return null
+}
 
 const NAV_ITEMS = [
   { label: 'Inicio', icon: Home, color: '#000000' },
@@ -172,6 +184,7 @@ export default function Dashboard() {
   )
   const [reportMarkers, setReportMarkers] = useState<ReportMarker[]>([])
   const [selectedMarker, setSelectedMarker] = useState<ReportMarker | null>(null)
+  const [reportsVersion, setReportsVersion] = useState(0)
 
   const selectedPlace = {
     name: 'Centro Comercial Caribe Plaza',
@@ -233,7 +246,7 @@ export default function Dashboard() {
     if (category !== 'todo') query = query.eq('category', category)
 
     query.then(({ data }) => setReportMarkers(data ?? []))
-  }, [category])
+  }, [category, reportsVersion])
 
   const filterOptions = useMemo(
     () => [{ key: 'todo', label: 'Todo', color: '#000000' }, ...mapCategories],
@@ -394,18 +407,19 @@ export default function Dashboard() {
           <ZoneReportsPanel
             category={category}
             locationStatus={locationStatus}
+            reportsVersion={reportsVersion}
             onConsultarHorario={() => setTimeModalOpen(true)}
           />
           <Map
             mapId="DEMO_MAP_ID"
             defaultCenter={CARTAGENA_CENTER}
-            center={searchedPlace ?? userLocation ?? undefined}
             defaultZoom={13}
-            zoom={searchedPlace ?? userLocation ? 15 : undefined}
             disableDefaultUI={false}
             className="h-full w-full"
             onClick={() => setSelectedMarker(null)}
           >
+            <RecenterMap target={searchedPlace ?? userLocation} />
+
             {userLocation && (
               <AdvancedMarker position={userLocation}>
                 <div className="h-4 w-4 rounded-full border-[3px] border-white bg-blue-600 shadow-[0_0_0_4px_rgba(37,99,235,0.3)]" />
@@ -484,6 +498,7 @@ export default function Dashboard() {
         <ReportModal
           userId={session.user.id}
           userLocation={userLocation}
+          onReportCreated={() => setReportsVersion((v) => v + 1)}
           onClose={() => setReportModalOpen(false)}
         />
       )}

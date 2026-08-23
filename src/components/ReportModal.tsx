@@ -26,10 +26,12 @@ type Selection = { categoryKey: string; label: string }
 export default function ReportModal({
   userId,
   userLocation,
+  onReportCreated,
   onClose,
 }: {
   userId: string
   userLocation: { lat: number; lng: number } | null
+  onReportCreated: () => void
   onClose: () => void
 }) {
   const [categories, setCategories] = useState<Category[]>([])
@@ -126,6 +128,7 @@ export default function ReportModal({
       return
     }
 
+    onReportCreated()
     setSubmitted(true)
   }
 

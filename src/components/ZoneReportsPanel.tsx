@@ -25,10 +25,12 @@ function bucketHour(isoDate: string) {
 export default function ZoneReportsPanel({
   category,
   locationStatus,
+  reportsVersion,
   onConsultarHorario,
 }: {
   category: string
   locationStatus: 'pending' | 'granted' | 'denied' | 'blocked'
+  reportsVersion: number
   onConsultarHorario: () => void
 }) {
   const [open, setOpen] = useState(false)
@@ -63,7 +65,7 @@ export default function ZoneReportsPanel({
       setReports(data ?? [])
       setLoading(false)
     })
-  }, [category, locationStatus])
+  }, [category, locationStatus, reportsVersion])
 
   const situationCounts: SituationCount[] = Object.values(
     reports.reduce<Record<string, SituationCount>>((acc, r) => {
