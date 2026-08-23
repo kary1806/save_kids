@@ -56,6 +56,7 @@ export default function ConditionsModal({
 }) {
   const [loading, setLoading] = useState(true)
   const [situations, setSituations] = useState<SituationSummary[]>([])
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
 
   useEffect(() => {
     if (!coords) {
@@ -95,9 +96,25 @@ export default function ConditionsModal({
       }
 
       setSituations(Array.from(bySituation.values()).sort((a, b) => b.count - a.count))
+
+      const mostRecent = inTimeRange.reduce<string | null>((latest, r) => {
+        if (!latest || r.occurred_at > latest) return r.occurred_at
+        return latest
+      }, null)
+      setLastUpdated(mostRecent)
+
       setLoading(false)
     })
   }, [coords?.lat, coords?.lng, time])
+
+  function formatLastUpdated(iso: string) {
+    const diffMs = Date.now() - new Date(iso).getTime()
+    const diffHours = Math.floor(diffMs / (60 * 60 * 1000))
+    if (diffHours < 1) return 'Última actualización: hace menos de 1 hora'
+    if (diffHours < 24) return `Última actualización: hace ${diffHours} h`
+    const diffDays = Math.floor(diffHours / 24)
+    return `Última actualización: hace ${diffDays} día${diffDays === 1 ? '' : 's'}`
+  }
 
   return (
     <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/40 px-4">
@@ -181,7 +198,7 @@ export default function ConditionsModal({
         )}
 
         <div className="mt-6 flex items-center gap-2 font-instrument text-sm text-black/60">
-          Basado en reportes de los últimos 30 días
+          {lastUpdated ? formatLastUpdated(lastUpdated) : 'Basado en reportes de los últimos 30 días'}
           <Info className="h-4 w-4 flex-shrink-0 text-black/40" />
         </div>
       </div>

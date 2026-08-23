@@ -38,6 +38,7 @@ export default function ReportModal({
   const [situations, setSituations] = useState<Situation[]>([])
   const [loadingOptions, setLoadingOptions] = useState(true)
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
   const [selections, setSelections] = useState<Selection[]>([])
   const [location, setLocation] = useState('')
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null)
@@ -197,28 +198,35 @@ export default function ReportModal({
           <p className="mt-4 font-instrument text-sm text-black/40">Cargando categorías...</p>
         ) : (
           <>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-3">
               {categories.map((cat) => {
                 const hasSelection = selections.some((s) => s.categoryKey === cat.key)
                 const isExpanded = expandedCategory === cat.key
+                const isHighlighted = hasSelection || hoveredCategory === cat.key
                 return (
                   <button
                     key={cat.key}
                     type="button"
                     onClick={() => toggleCategory(cat.key)}
-                    className={`rounded-full border px-4 py-1.5 font-instrument text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 ${
+                    onMouseEnter={() => setHoveredCategory(cat.key)}
+                    onMouseLeave={() => setHoveredCategory(null)}
+                    className={`flex items-center gap-2 rounded-full border px-4 py-1.5 font-instrument text-sm transition-all duration-200 active:scale-95 ${
                       isExpanded ? 'ring-2 ring-offset-1' : ''
                     }`}
                     style={
                       hasSelection
-                        ? {
-                            backgroundColor: cat.color,
-                            borderColor: cat.color,
-                            color: '#fff',
-                          }
-                        : { borderColor: '#afafaf', color: '#000' }
+                        ? { backgroundColor: cat.color, borderColor: cat.color, color: '#fff' }
+                        : isHighlighted
+                          ? { borderColor: cat.color, color: '#000' }
+                          : { borderColor: '#e5e4e7', color: '#000' }
                     }
                   >
+                    {isHighlighted && (
+                      <span
+                        className="h-2 w-2 flex-shrink-0 rounded-full"
+                        style={{ backgroundColor: hasSelection ? '#fff' : cat.color }}
+                      />
+                    )}
                     {cat.label}
                   </button>
                 )
@@ -294,7 +302,7 @@ export default function ReportModal({
             <span className="font-instrument text-xs font-medium text-black/60">
               Seleccionar ubicación
             </span>
-            <div className="flex items-center gap-2 rounded-lg border border-hairline px-3 py-2">
+            <div className="flex h-10 items-center gap-2 rounded-lg border border-hairline px-3">
               <PlaceAutocompleteInput
                 placeholder="Ej. Av. Pedro de heredia"
                 className="w-full min-w-0 font-instrument text-sm text-black outline-none"
@@ -323,7 +331,7 @@ export default function ReportModal({
             <span className="font-instrument text-xs font-medium text-black/60">
               ¿Cuándo ocurrió?
             </span>
-            <div className="flex items-center gap-2 rounded-lg border border-hairline px-3 py-2">
+            <div className="flex h-10 items-center gap-2 rounded-lg border border-hairline px-3">
               <Clock className="h-4 w-4 flex-shrink-0 text-black/40" />
               <input
                 type="datetime-local"
