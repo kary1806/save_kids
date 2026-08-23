@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, MapPin, Info, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, X, MapPin, Info, ShieldCheck } from 'lucide-react'
 import type { TimeOfDay } from './TimeSelectorModal'
 import { supabase } from '../lib/supabase'
 import { situationIcon } from '../lib/situationIcons'
@@ -33,8 +33,6 @@ const PREVENTIVE_TIPS: Record<string, string> = {
   Otro: 'Mantente alerta a tu entorno y comparte tu ubicación con alguien de confianza.',
 }
 
-const NEARBY_DEGREES = 0.045 // ~5km
-
 type CategoryInfo = { key: string; label: string; color: string }
 type ReportRow = { category: string; situation: string; occurred_at: string }
 type SituationSummary = { situation: string; color: string; count: number }
@@ -42,18 +40,18 @@ type SituationSummary = { situation: string; color: string; count: number }
 export default function ConditionsModal({
   placeName,
   address,
-  coords,
   category,
   time,
   userInitial,
+  onBack,
   onClose,
 }: {
   placeName: string
   address: string
-  coords: { lat: number; lng: number } | null
   category: string
   time: TimeOfDay
   userInitial: string
+  onBack: () => void
   onClose: () => void
 }) {
   const [loading, setLoading] = useState(true)
@@ -61,11 +59,6 @@ export default function ConditionsModal({
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!coords) {
-      setLoading(false)
-      return
-    }
-
     setLoading(true)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
@@ -73,10 +66,6 @@ export default function ConditionsModal({
       .from('reports')
       .select('category, situation, occurred_at')
       .gte('occurred_at', sevenDaysAgo)
-      .gte('latitude', coords.lat - NEARBY_DEGREES)
-      .lte('latitude', coords.lat + NEARBY_DEGREES)
-      .gte('longitude', coords.lng - NEARBY_DEGREES)
-      .lte('longitude', coords.lng + NEARBY_DEGREES)
 
     if (category !== 'todo') reportsQuery = reportsQuery.eq('category', category)
 
@@ -93,10 +82,11 @@ export default function ConditionsModal({
 
       const bySituation = new Map<string, SituationSummary>()
       for (const r of inTimeRange) {
+        const key = `${r.category}::${r.situation}`
         const color = categories.find((c) => c.key === r.category)?.color ?? '#6b7280'
-        const existing = bySituation.get(r.situation)
+        const existing = bySituation.get(key)
         if (existing) existing.count += 1
-        else bySituation.set(r.situation, { situation: r.situation, color, count: 1 })
+        else bySituation.set(key, { situation: r.situation, color, count: 1 })
       }
 
       setSituations(Array.from(bySituation.values()).sort((a, b) => b.count - a.count))
@@ -109,7 +99,7 @@ export default function ConditionsModal({
 
       setLoading(false)
     })
-  }, [coords?.lat, coords?.lng, category, time])
+  }, [category, time])
 
   function formatLastUpdated(iso: string) {
     const diffMs = Date.now() - new Date(iso).getTime()
@@ -123,6 +113,15 @@ export default function ConditionsModal({
   return (
     <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/40 px-4">
       <div className="animate-fade-up relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl sm:p-8">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Volver a horarios"
+          className="absolute left-5 top-5 text-black transition-colors duration-200 hover:text-black/60"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+
         <button
           type="button"
           onClick={onClose}
@@ -153,9 +152,8 @@ export default function ConditionsModal({
                 Sin reportes recientes para {TIME_LABEL[time]}
               </p>
               <p className="mt-1 font-instrument text-sm text-black/70">
-                No se han registrado situaciones cerca de este lugar en los últimos 7 días para
-                este horario. Aun así, mantente alerta a tu entorno y comparte tu ubicación con
-                alguien de confianza.
+                No se han registrado situaciones en los últimos 7 días para este horario. Aun así,
+                mantente alerta a tu entorno y comparte tu ubicación con alguien de confianza.
               </p>
             </div>
           </div>
@@ -166,10 +164,10 @@ export default function ConditionsModal({
                 Condiciones y riesgos reportados para {TIME_LABEL[time]}
               </p>
               <div className="mt-4 flex flex-col gap-3">
-                {situations.map((item) => {
+                {situations.map((item, index) => {
                   const Icon = situationIcon(item.situation)
                   return (
-                    <div key={item.situation} className="flex items-center gap-3">
+                    <div key={`${item.situation}-${index}`} className="flex items-center gap-3">
                       <span
                         className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
                         style={{ backgroundColor: `${item.color}20` }}
@@ -188,12 +186,12 @@ export default function ConditionsModal({
                 Recomendaciones preventivas
               </p>
               <ul className="mt-4 flex flex-col gap-2">
-                {situations.map((item) => (
+                {Array.from(new Set(situations.map((item) => item.situation))).map((label) => (
                   <li
-                    key={item.situation}
+                    key={label}
                     className="font-instrument text-sm text-black/80 before:mr-1.5 before:content-['•']"
                   >
-                    {PREVENTIVE_TIPS[item.situation] ?? PREVENTIVE_TIPS.Otro}
+                    {PREVENTIVE_TIPS[label] ?? PREVENTIVE_TIPS.Otro}
                   </li>
                 ))}
               </ul>
