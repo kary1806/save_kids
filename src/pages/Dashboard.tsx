@@ -411,18 +411,13 @@ export default function Dashboard() {
                 onMouseLeave={() => setHoveredCategory(null)}
                 className="flex flex-shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 font-instrument text-sm transition-all duration-200 active:scale-95"
                 style={
-                  isActive
+                  isHighlighted
                     ? { backgroundColor: cat.color, borderColor: cat.color, color: '#fff' }
-                    : isHighlighted
-                      ? { borderColor: cat.color, color: neutralText }
-                      : { borderColor: neutralBorder, color: neutralText }
+                    : { borderColor: neutralBorder, color: neutralText }
                 }
               >
                 {isHighlighted && (
-                  <span
-                    className="h-2 w-2 flex-shrink-0 rounded-full"
-                    style={{ backgroundColor: isActive ? '#fff' : cat.color }}
-                  />
+                  <span className="h-2 w-2 flex-shrink-0 rounded-full bg-white" />
                 )}
                 {cat.label}
               </button>
