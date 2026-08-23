@@ -28,7 +28,7 @@ import PlaceAutocompleteInput from '../components/PlaceAutocompleteInput'
 import ProfileModal from '../components/ProfileModal'
 import SettingsModal from '../components/SettingsModal'
 import HelpModal from '../components/HelpModal'
-import MyReportsModal from '../components/MyReportsModal'
+import MyReportsPanel from '../components/MyReportsPanel'
 import infoCardIllustration from '../assets/info-card-illustration.png'
 
 type MapCategory = { key: string; label: string; color: string }
@@ -173,7 +173,6 @@ export default function Dashboard() {
   const [profileModalOpen, setProfileModalOpen] = useState(false)
   const [settingsModalOpen, setSettingsModalOpen] = useState(false)
   const [helpModalOpen, setHelpModalOpen] = useState(false)
-  const [myReportsModalOpen, setMyReportsModalOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('Inicio')
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [searchedPlace, setSearchedPlace] = useState<{ lat: number; lng: number } | null>(null)
@@ -275,7 +274,6 @@ export default function Dashboard() {
     setActiveNav(label)
     if (label === 'Reportar Situación') setReportModalOpen(true)
     if (label === 'Tu perfil') setProfileModalOpen(true)
-    if (label === 'Rutas') setMyReportsModalOpen(true)
   }
 
   return (
@@ -376,6 +374,10 @@ export default function Dashboard() {
           </button>
         </header>
 
+        {activeNav === 'Rutas' ? (
+          <MyReportsPanel userId={session.user.id} />
+        ) : (
+        <>
         <div className="flex gap-3 overflow-x-auto px-4 py-3 sm:px-6">
           {filterOptions.map((cat) => {
             const isActive = category === cat.key
@@ -484,6 +486,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
 
       {timeModalOpen && (
@@ -528,10 +532,6 @@ export default function Dashboard() {
       {settingsModalOpen && <SettingsModal onClose={() => setSettingsModalOpen(false)} />}
 
       {helpModalOpen && <HelpModal onClose={() => setHelpModalOpen(false)} />}
-
-      {myReportsModalOpen && (
-        <MyReportsModal userId={session.user.id} onClose={() => setMyReportsModalOpen(false)} />
-      )}
     </div>
     </APIProvider>
   )
