@@ -42,11 +42,13 @@ export default function PlaceAutocompleteInput({
 
     autocompleteEl.setAttribute('class', className ?? 'w-full min-w-0')
     autocompleteEl.setAttribute('placeholder', placeholder)
+    autocompleteEl.style.setProperty('color-scheme', 'light')
     autocompleteEl.style.setProperty('--gmp-mat-color-surface', '#ffffff')
     autocompleteEl.style.setProperty('--gmp-mat-color-on-surface', '#000000')
     autocompleteEl.style.setProperty('--gmp-mat-color-on-surface-variant', '#6b7280')
     autocompleteEl.style.setProperty('--gmp-mat-color-primary', '#235ee0')
     autocompleteEl.style.setProperty('--gmp-mat-color-outline', 'transparent')
+    container.style.setProperty('color-scheme', 'light')
     container.appendChild(autocompleteEl)
 
     async function handleSelect(event: Event) {
