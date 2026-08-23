@@ -294,7 +294,7 @@ export default function Dashboard() {
 
   return (
     <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
-    <div className="flex h-screen w-full overflow-hidden bg-white dark:bg-gray-950">
+    <div className="flex h-dvh w-full overflow-hidden bg-white dark:bg-gray-950">
       <aside className="hidden flex-shrink-0 border-r border-hairline md:flex">
         <Sidebar
           activeNav={activeNav}

@@ -42,7 +42,7 @@ export default function Home() {
             to="/dashboard"
             className="rounded-2xl bg-brand px-6 py-3 font-instrument font-semibold text-white shadow-md transition-transform duration-200 hover:scale-105 active:scale-95"
           >
-            Dashboard
+            Comenzar
           </Link>
         </div>
       </main>

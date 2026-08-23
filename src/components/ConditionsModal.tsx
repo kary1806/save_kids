@@ -111,7 +111,7 @@ export default function ConditionsModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/40 px-4">
+    <div className="fixed inset-0 z-[3000] flex items-start justify-center overflow-y-auto bg-black/40 px-4 py-8 sm:items-center">
       <div className="animate-fade-up relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl sm:p-8">
         <button
           type="button"
