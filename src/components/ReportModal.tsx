@@ -149,7 +149,7 @@ export default function ReportModal({
   if (submitted) {
     return (
       <div className="fixed inset-0 z-[3000] flex items-start justify-center overflow-y-auto bg-black/40 px-4 py-8 sm:items-center">
-        <div className="animate-fade-up relative w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
+        <div className="animate-fade-up relative w-full max-w-xl rounded-2xl bg-white p-8 text-center shadow-xl">
           <button
             type="button"
             onClick={onClose}
@@ -227,18 +227,13 @@ export default function ReportModal({
                       isExpanded ? 'ring-2 ring-offset-1' : ''
                     }`}
                     style={
-                      hasSelection
+                      isHighlighted
                         ? { backgroundColor: cat.color, borderColor: cat.color, color: '#fff' }
-                        : isHighlighted
-                          ? { borderColor: cat.color, color: '#000' }
-                          : { borderColor: '#e5e4e7', color: '#000' }
+                        : { borderColor: '#e5e4e7', color: '#000' }
                     }
                   >
                     {isHighlighted && (
-                      <span
-                        className="h-2 w-2 flex-shrink-0 rounded-full"
-                        style={{ backgroundColor: hasSelection ? '#fff' : cat.color }}
-                      />
+                      <span className="h-2 w-2 flex-shrink-0 rounded-full bg-white" />
                     )}
                     {cat.label}
                   </button>
