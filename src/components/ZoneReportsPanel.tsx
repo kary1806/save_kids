@@ -119,7 +119,7 @@ export default function ZoneReportsPanel({
       </button>
 
       {open && (
-        <div className="animate-fade-up mt-2 flex max-h-[calc(100dvh-20rem)] flex-col gap-4 overflow-y-auto rounded-2xl border border-hairline bg-white p-4 shadow-lg">
+        <div className="animate-fade-up mt-2 flex max-h-[calc(100dvh-24rem)] flex-col gap-4 overflow-y-auto rounded-2xl border border-hairline bg-white p-4 shadow-lg">
           {locationStatus === 'pending' && (
             <p className="font-instrument text-sm text-black/40">Solicitando ubicación...</p>
           )}
