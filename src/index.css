@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-instrument: 'Instrument Sans', sans-serif;
 
@@ -14,6 +16,14 @@ body {
   margin: 0;
   color: #000;
   font-family: var(--font-instrument);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.dark body {
+  background: #0f1115;
+  color: #f2f2f2;
 }
 
 @keyframes fade-up {

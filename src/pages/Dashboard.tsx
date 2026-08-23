@@ -25,6 +25,9 @@ import ZoneReportsPanel from '../components/ZoneReportsPanel'
 import TimeSelectorModal, { type TimeOfDay } from '../components/TimeSelectorModal'
 import ConditionsModal from '../components/ConditionsModal'
 import ReportModal from '../components/ReportModal'
+import ProfileModal from '../components/ProfileModal'
+import SettingsModal from '../components/SettingsModal'
+import HelpModal from '../components/HelpModal'
 
 const CATEGORIES = [
   { key: 'todo', label: 'Todo' },
@@ -87,11 +90,15 @@ function Sidebar({
   onNavClick,
   onClose,
   onSignOut,
+  onOpenSettings,
+  onOpenHelp,
 }: {
   activeNav: string
   onNavClick: (label: string) => void
   onClose?: () => void
   onSignOut: () => void
+  onOpenSettings: () => void
+  onOpenHelp: () => void
 }) {
   return (
     <div className="flex h-full w-64 flex-col px-4 py-6">
@@ -134,6 +141,7 @@ function Sidebar({
       <div className="mt-6 flex flex-col gap-1 border-t border-hairline pt-6">
         <button
           type="button"
+          onClick={onOpenSettings}
           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5"
         >
           <Settings className="h-5 w-5 flex-shrink-0" />
@@ -141,6 +149,7 @@ function Sidebar({
         </button>
         <button
           type="button"
+          onClick={onOpenHelp}
           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-instrument text-sm text-black/60 transition-colors duration-200 hover:bg-brand/5"
         >
           <HelpCircle className="h-5 w-5 flex-shrink-0" />
@@ -182,6 +191,9 @@ export default function Dashboard() {
   const [timeModalOpen, setTimeModalOpen] = useState(false)
   const [selectedTime, setSelectedTime] = useState<TimeOfDay | null>(null)
   const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [profileModalOpen, setProfileModalOpen] = useState(false)
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false)
+  const [helpModalOpen, setHelpModalOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('Inicio')
 
   const selectedPlace = {
@@ -219,7 +231,13 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white">
       <aside className="hidden flex-shrink-0 border-r border-hairline md:flex">
-        <Sidebar activeNav={activeNav} onNavClick={handleNavClick} onSignOut={handleSignOut} />
+        <Sidebar
+          activeNav={activeNav}
+          onNavClick={handleNavClick}
+          onSignOut={handleSignOut}
+          onOpenSettings={() => setSettingsModalOpen(true)}
+          onOpenHelp={() => setHelpModalOpen(true)}
+        />
       </aside>
 
       {menuOpen && (
@@ -229,6 +247,14 @@ export default function Dashboard() {
               activeNav={activeNav}
               onNavClick={(label) => {
                 handleNavClick(label)
+                setMenuOpen(false)
+              }}
+              onOpenSettings={() => {
+                setSettingsModalOpen(true)
+                setMenuOpen(false)
+              }}
+              onOpenHelp={() => {
+                setHelpModalOpen(true)
                 setMenuOpen(false)
               }}
               onClose={() => setMenuOpen(false)}
@@ -268,7 +294,12 @@ export default function Dashboard() {
             <Bell className="h-5 w-5 text-black/70" />
           </button>
 
-          <div className="flex flex-shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setProfileModalOpen(true)}
+            aria-label="Tu perfil"
+            className="flex flex-shrink-0 items-center gap-2 transition-transform duration-200 hover:scale-105"
+          >
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand font-instrument text-sm font-semibold text-white">
               {initial}
             </span>
@@ -276,7 +307,7 @@ export default function Dashboard() {
               <p className="font-instrument text-sm font-medium text-black">{displayName}</p>
               {role && <p className="font-instrument text-xs capitalize text-black/50">{role}</p>}
             </div>
-          </div>
+          </button>
         </header>
 
         <div className="flex gap-2 overflow-x-auto px-4 py-3 sm:px-6">
@@ -364,6 +395,19 @@ export default function Dashboard() {
       {reportModalOpen && (
         <ReportModal userId={session.user.id} onClose={() => setReportModalOpen(false)} />
       )}
+
+      {profileModalOpen && (
+        <ProfileModal
+          displayName={displayName}
+          email={session.user.email ?? ''}
+          role={role}
+          onClose={() => setProfileModalOpen(false)}
+        />
+      )}
+
+      {settingsModalOpen && <SettingsModal onClose={() => setSettingsModalOpen(false)} />}
+
+      {helpModalOpen && <HelpModal onClose={() => setHelpModalOpen(false)} />}
     </div>
   )
 }

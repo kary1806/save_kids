@@ -31,14 +31,14 @@ export default function Landing() {
       <main className="mx-auto flex w-full max-w-[1296px] flex-1 flex-col items-center gap-12 px-8 py-16 md:flex-row md:justify-center md:gap-24">
         <HeroCarousel />
 
-        <div className="hidden self-stretch border-l border-divider md:block" />
+        <div className="hidden self-stretch border-l border-divider dark:border-white/10 md:block" />
 
         <div className="flex flex-col items-center gap-8 text-center md:items-start md:text-left">
           <div className="animate-fade-up [animation-delay:150ms]">
-            <h1 className="font-instrument text-5xl font-semibold tracking-wide text-black">
+            <h1 className="font-instrument text-5xl font-semibold tracking-wide text-black dark:text-white">
               HOLA!
             </h1>
-            <p className="mt-2 font-instrument text-3xl font-normal text-black">
+            <p className="mt-2 font-instrument text-3xl font-normal text-black dark:text-white">
               ¿Cómo utilizarás Safe Kids?
             </p>
           </div>
@@ -49,7 +49,7 @@ export default function Landing() {
                 key={option.to}
                 to={option.to}
                 style={{ animationDelay: `${250 + i * 100}ms` }}
-                className="group flex animate-fade-up items-center gap-4 font-instrument text-2xl text-black transition-colors duration-200 hover:text-brand"
+                className="group flex animate-fade-up items-center gap-4 font-instrument text-2xl text-black transition-colors duration-200 hover:text-brand dark:text-white"
               >
                 <span className="transition-transform duration-200 group-hover:translate-x-1">
                   {option.label}
