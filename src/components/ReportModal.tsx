@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X, MapPin, Clock, Send, CloudCheck, ShieldCheck, Lock, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -17,38 +17,9 @@ const CONFIRMATION_ITEMS = [
   },
 ]
 
-const CATEGORIES = [
-  {
-    key: 'seguridad',
-    label: 'Seguridad Ciudadana',
-    color: '#ef4444',
-    subItems: ['Robo', 'Violencia', 'Persona Sospechosa', 'Poca iluminación', 'Otro'],
-  },
-  {
-    key: 'vial',
-    label: 'Riesgo Vial',
-    color: '#f59e0b',
-    subItems: ['Tráfico', 'Cruce Peligroso', 'Accidente', 'Vía en mal estado', 'Otro'],
-  },
-  {
-    key: 'ambiental',
-    label: 'Ambiental',
-    color: '#22c55e',
-    subItems: ['Inundación', 'Lluvias intensas', 'Deslizamiento', 'Otro'],
-  },
-  {
-    key: 'nna',
-    label: 'Protección NNA',
-    color: '#a855f7',
-    subItems: ['Acoso', 'Otro'],
-  },
-  {
-    key: 'escolar',
-    label: 'Entorno Escolar',
-    color: '#3b82f6',
-    subItems: ['Alta circulación vehicular', 'Persona Sospechosa', 'Cruce Peligroso', 'Otro'],
-  },
-] as const
+type Category = { key: string; label: string; color: string }
+type Situation = { id: string; category_key: string; label: string }
+type Selection = { categoryKey: string; label: string }
 
 export default function ReportModal({
   userId,
@@ -57,8 +28,11 @@ export default function ReportModal({
   userId: string
   onClose: () => void
 }) {
-  const [category, setCategory] = useState<(typeof CATEGORIES)[number]['key'] | null>(null)
-  const [subItem, setSubItem] = useState<string | null>(null)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [situations, setSituations] = useState<Situation[]>([])
+  const [loadingOptions, setLoadingOptions] = useState(true)
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+  const [selections, setSelections] = useState<Selection[]>([])
   const [location, setLocation] = useState('')
   const [when, setWhen] = useState(() => new Date().toISOString().slice(0, 16))
   const [description, setDescription] = useState('')
@@ -67,31 +41,54 @@ export default function ReportModal({
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const activeCategory = CATEGORIES.find((c) => c.key === category)
-  const canSubmit = Boolean(category && subItem && location && when && confirmed)
+  useEffect(() => {
+    Promise.all([
+      supabase.from('report_categories').select('*').order('sort_order'),
+      supabase.from('report_situations').select('*').order('sort_order'),
+    ]).then(([categoriesRes, situationsRes]) => {
+      setCategories(categoriesRes.data ?? [])
+      setSituations(situationsRes.data ?? [])
+      setLoadingOptions(false)
+    })
+  }, [])
 
-  function handleCategoryClick(key: (typeof CATEGORIES)[number]['key']) {
-    if (category === key) {
-      setSubItem(null)
-      return
-    }
-    setCategory(key)
-    setSubItem(null)
+  const canSubmit = Boolean(selections.length > 0 && location && when && confirmed)
+
+  function toggleCategory(key: string) {
+    setExpandedCategory((current) => (current === key ? null : key))
+  }
+
+  function toggleSituation(categoryKey: string, label: string) {
+    setSelections((current) => {
+      const exists = current.some((s) => s.categoryKey === categoryKey && s.label === label)
+      if (exists) {
+        return current.filter((s) => !(s.categoryKey === categoryKey && s.label === label))
+      }
+      return [...current, { categoryKey, label }]
+    })
+  }
+
+  function removeSelection(categoryKey: string, label: string) {
+    setSelections((current) =>
+      current.filter((s) => !(s.categoryKey === categoryKey && s.label === label)),
+    )
   }
 
   async function handleSubmit() {
-    if (!canSubmit || !category || !subItem) return
+    if (!canSubmit) return
     setSubmitting(true)
     setError(null)
 
-    const { error: insertError } = await supabase.from('reports').insert({
-      user_id: userId,
-      category,
-      situation: subItem,
-      location,
-      occurred_at: new Date(when).toISOString(),
-      description: description || null,
-    })
+    const { error: insertError } = await supabase.from('reports').insert(
+      selections.map((s) => ({
+        user_id: userId,
+        category: s.categoryKey,
+        situation: s.label,
+        location,
+        occurred_at: new Date(when).toISOString(),
+        description: description || null,
+      })),
+    )
 
     setSubmitting(false)
 
@@ -131,10 +128,7 @@ export default function ReportModal({
 
           <div className="mt-6 flex flex-col gap-3 text-left">
             {CONFIRMATION_ITEMS.map((item) => (
-              <div
-                key={item.text}
-                className="flex items-start gap-3 rounded-xl bg-green-100 p-3"
-              >
+              <div key={item.text} className="flex items-start gap-3 rounded-xl bg-green-100 p-3">
                 <item.icon className="h-5 w-5 flex-shrink-0 text-green-700" />
                 <p className="font-instrument text-sm text-green-900">{item.text}</p>
               </div>
@@ -164,62 +158,103 @@ export default function ReportModal({
           ¿Qué ocurrió?
         </h2>
         <p className="mt-1 font-instrument text-sm text-black/60">
-          Selecciona una situación. No incluyas nombres ni datos personales.
+          Selecciona una o más situaciones. No incluyas nombres ni datos personales.
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => {
-            const isActive = category === cat.key
-            return (
-              <button
-                key={cat.key}
-                type="button"
-                onClick={() => handleCategoryClick(cat.key)}
-                className="rounded-full border px-4 py-1.5 font-instrument text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
-                style={
-                  isActive
-                    ? { backgroundColor: cat.color, borderColor: cat.color, color: '#fff' }
-                    : { borderColor: '#afafaf', color: '#000' }
-                }
-              >
-                {cat.label}
-              </button>
-            )
-          })}
-        </div>
+        {loadingOptions ? (
+          <p className="mt-4 font-instrument text-sm text-black/40">Cargando categorías...</p>
+        ) : (
+          <>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {categories.map((cat) => {
+                const hasSelection = selections.some((s) => s.categoryKey === cat.key)
+                const isExpanded = expandedCategory === cat.key
+                return (
+                  <button
+                    key={cat.key}
+                    type="button"
+                    onClick={() => toggleCategory(cat.key)}
+                    className={`rounded-full border px-4 py-1.5 font-instrument text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 ${
+                      isExpanded ? 'ring-2 ring-offset-1' : ''
+                    }`}
+                    style={
+                      hasSelection
+                        ? {
+                            backgroundColor: cat.color,
+                            borderColor: cat.color,
+                            color: '#fff',
+                          }
+                        : { borderColor: '#afafaf', color: '#000' }
+                    }
+                  >
+                    {cat.label}
+                  </button>
+                )
+              })}
+            </div>
 
-        {activeCategory && !subItem && (
-          <div className="animate-fade-up mt-3 flex flex-col overflow-hidden rounded-xl border border-hairline shadow-sm">
-            {activeCategory.subItems.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setSubItem(item)}
-                className="flex items-center gap-2 px-3 py-2.5 text-left font-instrument text-sm text-black transition-colors duration-200 hover:bg-black/5"
-              >
-                <span
-                  className="h-3 w-3 flex-shrink-0 rounded-full"
-                  style={{ backgroundColor: activeCategory.color }}
-                />
-                {item}
-              </button>
-            ))}
-          </div>
-        )}
+            {expandedCategory && (
+              <div className="animate-fade-up mt-3 flex flex-col overflow-hidden rounded-xl border border-hairline shadow-sm">
+                {situations
+                  .filter((s) => s.category_key === expandedCategory)
+                  .map((item) => {
+                    const category = categories.find((c) => c.key === expandedCategory)
+                    const isSelected = selections.some(
+                      (s) => s.categoryKey === expandedCategory && s.label === item.label,
+                    )
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => toggleSituation(expandedCategory, item.label)}
+                        className={`flex items-center gap-2 px-3 py-2.5 text-left font-instrument text-sm text-black transition-colors duration-200 hover:bg-black/5 ${
+                          isSelected ? 'bg-black/5 font-semibold' : ''
+                        }`}
+                      >
+                        <span
+                          className="h-3 w-3 flex-shrink-0 rounded-full"
+                          style={{ backgroundColor: category?.color }}
+                        />
+                        {item.label}
+                        {isSelected && <span className="ml-auto text-brand">✓</span>}
+                      </button>
+                    )
+                  })}
+              </div>
+            )}
 
-        {activeCategory && subItem && (
-          <div className="animate-fade-up mt-3">
-            <span
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-instrument text-sm font-medium"
-              style={{ backgroundColor: `${activeCategory.color}20`, color: activeCategory.color }}
-            >
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: activeCategory.color }}
-              />
-              {subItem}
-            </span>
-          </div>
+            {selections.length > 0 && (
+              <div className="animate-fade-up mt-3 flex flex-wrap gap-2">
+                {selections.map((s) => {
+                  const category = categories.find((c) => c.key === s.categoryKey)
+                  return (
+                    <span
+                      key={`${s.categoryKey}-${s.label}`}
+                      className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-instrument text-sm font-medium"
+                      style={{
+                        backgroundColor: `${category?.color}20`,
+                        color: category?.color,
+                      }}
+                    >
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: category?.color }}
+                      />
+                      {s.label}
+                      <button
+                        type="button"
+                        onClick={() => removeSelection(s.categoryKey, s.label)}
+                        aria-label={`Quitar ${s.label}`}
+                        className="ml-0.5 hover:opacity-60"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  )
+                })}
+              </div>
+            )}
+          </>
         )}
 
         <div className="mt-5 grid grid-cols-1 gap-4 border-t border-hairline pt-5 sm:grid-cols-2">
