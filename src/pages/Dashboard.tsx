@@ -461,23 +461,27 @@ export default function Dashboard() {
             )}
           </Map>
 
-          <div className="absolute inset-x-4 bottom-4 z-[1000] flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl bg-white px-5 py-3 shadow-xl">
-            <p className="flex items-center gap-1.5 font-instrument text-xs font-semibold text-black">
+          <div className="absolute bottom-4 left-4 z-[1000] flex w-fit flex-col gap-2 rounded-2xl bg-white px-5 py-3 shadow-xl">
+            <p className="flex items-center gap-1.5 whitespace-nowrap font-instrument text-xs font-semibold text-black">
               <Shield className="h-3.5 w-3.5 flex-shrink-0 text-brand" />
               Información del Mapa
             </p>
-            {mapCategories.map((cat) => (
-              <div key={cat.key} className="flex items-center gap-1.5">
-                <svg viewBox="0 0 24 24" className="h-4 w-4 flex-shrink-0">
-                  <path
-                    d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
-                    fill={cat.color}
-                  />
-                  <circle cx="12" cy="10" r="3" fill="#ffffff" />
-                </svg>
-                <span className="font-instrument text-xs text-black/70">{cat.label}</span>
-              </div>
-            ))}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              {mapCategories.map((cat) => (
+                <div key={cat.key} className="flex items-center gap-1.5">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 flex-shrink-0">
+                    <path
+                      d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
+                      fill={cat.color}
+                    />
+                    <circle cx="12" cy="10" r="3" fill="#ffffff" />
+                  </svg>
+                  <span className="whitespace-nowrap font-instrument text-xs text-black/70">
+                    {cat.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
