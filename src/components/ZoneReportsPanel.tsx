@@ -23,12 +23,10 @@ type SituationCount = {
   situationId: string
 }
 
-const HOURS = ['0', '2', '4', '6', '8', '10', '12', '14', '16', '18', '20', '22']
+const HOURS = Array.from({ length: 24 }, (_, hour) => String(hour))
 
 function bucketHour(isoDate: string) {
-  const hour = new Date(isoDate).getHours()
-  const bucket = Math.floor(hour / 2) * 2
-  return String(bucket)
+  return String(new Date(isoDate).getHours())
 }
 
 export default function ZoneReportsPanel({
@@ -105,7 +103,7 @@ export default function ZoneReportsPanel({
   const peakHour = hourlyCounts.reduce((max, h) => (h.value > max.value ? h : max), hourlyCounts[0])
 
   return (
-    <div className="absolute right-4 top-4 z-[1000] w-72 max-w-[calc(100vw-2rem)]">
+    <div className="absolute right-4 top-4 z-[1000] w-80 max-w-[calc(100vw-2rem)]">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -240,7 +238,7 @@ export default function ZoneReportsPanel({
                     Basado en reportes recientes
                   </p>
 
-                  <div className="mt-3 flex items-end gap-1.5">
+                  <div className="mt-3 flex items-end gap-0.5">
                     {hourlyCounts.map((h) => (
                       <div key={h.hour} className="flex flex-1 flex-col items-center gap-1">
                         <div
@@ -249,13 +247,15 @@ export default function ZoneReportsPanel({
                           }`}
                           style={{ height: `${(h.value / maxHourly) * 48}px` }}
                         />
-                        <span className="font-instrument text-[10px] text-black/40">{h.hour}</span>
+                        <span className="font-instrument text-[7px] leading-none text-black/40">
+                          {h.hour}
+                        </span>
                       </div>
                     ))}
                   </div>
                   {peakHour.value > 0 && (
                     <p className="mt-2 text-center font-instrument text-xs font-medium text-brand">
-                      {peakHour.hour}:00 – {(Number(peakHour.hour) + 2) % 24}:00
+                      {peakHour.hour}:00 – {(Number(peakHour.hour) + 1) % 24}:00
                     </p>
                   )}
                 </div>
